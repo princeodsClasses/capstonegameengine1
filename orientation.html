@@ -223,6 +223,48 @@
   }
   .home-btn:hover{ box-shadow:var(--card-shadow-lg); }
 
+  /* ---------- Cursor trail ---------- */
+  #cursorTrail{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999; }
+
+  /* ---------- Card hover invert (recognizable mouse-over) ---------- */
+  .feature-card, .intro-tag, .intro-statement, .meta-chip, .step-card, .grade-item{
+    transition: background .22s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .feature-card:hover, .intro-tag:hover, .intro-statement:hover,
+  .meta-chip:hover, .step-card:hover, .grade-item:hover{
+    transform:translateY(-3px); box-shadow:var(--card-shadow-lg); cursor:default;
+  }
+
+  .feature-card:nth-child(4n+1):hover, .intro-tag:nth-child(4n+1):hover, .meta-chip:nth-child(3n+1):hover{
+    background:linear-gradient(135deg,var(--blue),var(--blue-dark));
+  }
+  .feature-card:nth-child(4n+2):hover, .intro-tag:nth-child(4n+2):hover, .meta-chip:nth-child(3n+2):hover{
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+  }
+  .feature-card:nth-child(4n+3):hover, .intro-tag:nth-child(4n+3):hover, .meta-chip:nth-child(3n+3):hover{
+    background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  }
+  .feature-card:nth-child(4n+4):hover, .intro-tag:nth-child(4n+4):hover{
+    background:linear-gradient(135deg,var(--yellow),var(--yellow-dark));
+  }
+  .feature-card:hover .feature-num, .feature-card:hover .feature-title, .feature-card:hover .feature-desc{ color:#fff; }
+  .intro-tag:hover .k, .intro-tag:hover .v{ color:#fff; }
+  .meta-chip:hover .k, .meta-chip:hover .v{ color:#fff; }
+
+  .intro-statement:hover{ background:linear-gradient(135deg,var(--blue),var(--blue-dark)); }
+  .intro-statement:hover p, .intro-statement:hover p b{ color:#fff; }
+
+  .step-card:hover{ background:var(--c); }
+  .step-card:hover .step-icon{ background:#fff; }
+  .step-card:hover .step-label, .step-card:hover .step-title, .step-card:hover .step-desc{ color:#fff; }
+
+  .grade-item:nth-child(1):hover{ background:linear-gradient(135deg,var(--yellow),var(--yellow-dark)); }
+  .grade-item:nth-child(2):hover{ background:linear-gradient(135deg,var(--green),var(--green-dark)); }
+  .grade-item:nth-child(3):hover{ background:linear-gradient(135deg,var(--pink),var(--pink-dark)); }
+  .grade-item:nth-child(4):hover{ background:linear-gradient(135deg,var(--blue),var(--blue-dark)); }
+  .grade-item:hover .g-title, .grade-item:hover .g-sub, .grade-item:hover .grade-pct{ color:#fff !important; }
+  .grade-item:hover .grade-bar-track{ background:rgba(255,255,255,.35); }
+
   /* ---------- Entrance animations (play when a slide becomes active) ---------- */
   @keyframes fadeUp{ 0%{ opacity:0; transform:translateY(16px); } 100%{ opacity:1; transform:translateY(0); } }
   @keyframes popIn{ 0%{ opacity:0; transform:scale(.82); } 100%{ opacity:1; transform:scale(1); } }
@@ -325,6 +367,8 @@
 <body>
 
 <a class="home-btn" href="index.html">← Course Home</a>
+
+<canvas id="cursorTrail"></canvas>
 
 <div class="reveal">
   <div class="slides">
@@ -589,6 +633,54 @@
     catch (err) { console.warn('Reveal not ready yet:', err); }
     setTimeout(() => { wheelLocked = false; }, 600);
   }, { passive: true });
+
+  // ---------- Cursor trail ----------
+  (() => {
+    const canvas = document.getElementById('cursorTrail');
+    const ctx = canvas.getContext('2d');
+    const rootStyle = getComputedStyle(document.documentElement);
+    const palette = ['--blue', '--green', '--pink', '--yellow-dark'].map(
+      v => rootStyle.getPropertyValue(v).trim()
+    );
+    let colorIndex = 0;
+    let particles = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    document.addEventListener('mousemove', (e) => {
+      particles.push({
+        x: e.clientX, y: e.clientY,
+        r: 9, alpha: 1,
+        color: palette[colorIndex++ % palette.length],
+      });
+      if (particles.length > 40) particles.shift();
+    });
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.r *= 0.92;
+        p.alpha *= 0.9;
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      particles = particles.filter(p => p.alpha > 0.03 && p.r > 0.5);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
 </script>
 </body>
 </html>
