@@ -139,6 +139,33 @@
     font-size:12px; color:var(--ink-faint); font-weight:700; letter-spacing:.3px;
   }
 
+  /* ---------- Coming soon popup ---------- */
+  .popup-overlay{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(27,43,58,.45);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .popup-overlay.show{ opacity:1; pointer-events:auto; }
+  .popup-card{
+    background:var(--white); border-radius:24px; padding:36px 40px;
+    box-shadow:var(--card-shadow-lg); text-align:center; max-width:300px;
+    transform:scale(.9); transition:transform .2s ease;
+  }
+  .popup-overlay.show .popup-card{ transform:scale(1); }
+  .popup-emoji{ font-size:38px; margin-bottom:12px; }
+  .popup-text{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px;
+    color:var(--ink); margin-bottom:22px; line-height:1.4;
+  }
+  .popup-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px;
+    padding:10px 30px; border-radius:999px; box-shadow:0 4px 0 var(--yellow-dark);
+    border:none; cursor:pointer;
+  }
+
   @media screen and (max-width:860px){
     .week-grid{ grid-template-columns:repeat(2, 1fr); }
     .hero h1{ font-size:44px; -webkit-text-stroke:4px var(--ink); }
@@ -174,7 +201,7 @@
     <a class="week-card milestone" href="orientation.html">
       <span class="week-num">ORIENTATION</span>
       <div class="week-title">오리엔테이션</div>
-      <div class="week-sub">준비중</div>
+      <!--div class="week-sub">준비중</div-->
       <span class="week-arrow">→</span>
     </a>
   </div>
@@ -183,18 +210,38 @@
 
 <footer>Game Engine Capstone · Digital Contents Design</footer>
 
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-card">
+    <div class="popup-emoji">🚧</div>
+    <div class="popup-text">아직 준비 중이에요..!</div>
+    <button class="popup-btn" id="popupClose">확인</button>
+  </div>
+</div>
+
 <script>
+  // class01.html 처럼 실제로 페이지가 만들어진 주차만 여기에 추가하면 카드가 바로 열립니다.
+  const READY_WEEKS = [];
+
   const weeks = Array.from({length: 15}, (_, i) => i + 1);
   const grid = document.getElementById('weekGrid');
+  const popupOverlay = document.getElementById('popupOverlay');
+
+  const showComingSoon = () => popupOverlay.classList.add('show');
+  const hideComingSoon = () => popupOverlay.classList.remove('show');
+  document.getElementById('popupClose').addEventListener('click', hideComingSoon);
+  popupOverlay.addEventListener('click', (e) => { if (e.target === popupOverlay) hideComingSoon(); });
+
   weeks.forEach(n => {
     const num = String(n).padStart(2, '0');
+    const ready = READY_WEEKS.includes(n);
     const a = document.createElement('a');
     a.className = 'week-card' + (n === 15 ? ' milestone' : '');
-    a.href = `class${num}.html`;
+    a.href = ready ? `class${num}.html` : '#';
+    if (!ready) a.addEventListener('click', (e) => { e.preventDefault(); showComingSoon(); });
     a.innerHTML = `
       <span class="week-num">WEEK ${num}</span>
       <div class="week-title">${n}주차</div>
-      <div class="week-sub">준비중</div>
+      <div class="week-sub">${ready ? '' : '준비중'}</div>
       <span class="week-arrow">→</span>
     `;
     grid.appendChild(a);
