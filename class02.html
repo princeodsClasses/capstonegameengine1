@@ -38,6 +38,7 @@
     height:100%; padding:0;
   }
   .reveal .slides section.plain-white{ background:#fff; }
+  .img-credit{ position:absolute; right:16px; bottom:12px; font-size:11px; color:var(--ink-faint); }
   .display{font-family:'Baloo 2',sans-serif;}
   .mono{font-family:'Nunito',sans-serif; font-weight:800;}
 
@@ -338,6 +339,109 @@
     transition:width .45s cubic-bezier(.22,.9,.32,1), height .45s cubic-bezier(.22,.9,.32,1);
   }
 
+  /* ---------- Editor stage (에디터 창 모자이크, 클릭한 이미지의 설명 카드 표시) ---------- */
+  .editor-stage{ flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0px; }
+  .editor-card{
+    width:100%; max-width:1161px; min-height:60px; box-sizing:border-box; margin-top:28px;
+    background:var(--white); border-radius:14px; padding:14px 26px; box-shadow:var(--card-shadow);
+    display:flex; align-items:center; gap:18px; opacity:.55; transition:opacity .2s ease;
+  }
+  .editor-card.editor-card-active{ opacity:1; }
+  .editor-card-title{
+    flex:0 0 auto; min-width:130px; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:var(--blue-dark);
+  }
+  .editor-card-desc{ font-size:13.5px; color:var(--ink-soft); line-height:1.5; }
+  .editor-canvas{ position:relative; width:1161px; height:306px; margin:auto; border-radius:10px; overflow:hidden; box-shadow:var(--card-shadow-lg); }
+  .editor-slot{
+    position:absolute; overflow:hidden; cursor:pointer;
+    transition:opacity .3s ease, box-shadow .3s ease;
+  }
+  .editor-canvas .editor-img{ display:block; width:100%; height:100%; max-width:none; max-height:none; margin:0; object-fit:cover; }
+  .editor-slot.editor-dim{ opacity:.3; }
+  .editor-slot.editor-active{
+    opacity:1; z-index:5;
+    animation:editorBlink 1s ease-in-out infinite;
+  }
+  @keyframes editorBlink{
+    0%,100%{ box-shadow:inset 0 0 0 4px var(--yellow); }
+    50%{ box-shadow:inset 0 0 0 4px transparent; }
+  }
+
+  /* ---------- Panel stage (개별 패널 설명: 제목 + 스크린샷 + 밈 + 세부 크롭, 클릭으로 순환) ---------- */
+  .panel-stage{ position:relative; cursor:pointer; }
+  .panel-heading{
+    position:absolute; left:0; top:0; z-index:7;
+    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:42px !important;
+    color:#fff !important; margin:0 !important; letter-spacing:-1px;
+    -webkit-text-stroke:4px var(--ink); paint-order:stroke fill;
+  }
+  .panel-piece{ position:absolute; overflow:hidden; border-radius:6px; box-shadow:var(--card-shadow); }
+  .panel-piece img{ display:block; width:100%; height:100%; max-width:none; max-height:none; margin:0; object-fit:cover; }
+  .panel-callout{ background:var(--white); }
+  .panel-callout img{ object-fit:contain; }
+  .panel-callout-fit{
+    left:50%; top:50%; width:auto; height:auto;
+    max-width:90%; max-height:90%; transform:translate(-50%, -50%);
+  }
+  .panel-callout-fit img{ display:block; width:auto; height:auto; max-width:100%; max-height:100%; }
+  .panel-piece.panel-callout-fit.panel-visible{ animation:popInCenter .35s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes popInCenter{
+    0%{ opacity:0; transform:translate(-50%, -50%) scale(.82); }
+    100%{ opacity:1; transform:translate(-50%, -50%) scale(1); }
+  }
+
+  /* ---------- Window columns (Project / Console 등 두 창을 나란히 설명) ---------- */
+  .window-cols{ flex:1; display:flex; gap:56px; min-height:0; margin-top:8px; }
+  .window-col{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .window-shot{ border-radius:8px; overflow:hidden; box-shadow:var(--card-shadow-lg); margin-bottom:18px; }
+  .window-shot img{ display:block; width:100%; height:auto; max-width:none; max-height:none; margin:0; }
+  .window-shot-callout{ max-width:75%; margin:0 auto 18px; }
+  .window-list{ display:flex; flex-direction:column; gap:9px; margin-bottom:8px; }
+  .window-item-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; color:var(--ink); }
+  .window-item-desc{ font-family:'Nunito',sans-serif; font-weight:600; font-size:12px; color:var(--ink-soft); line-height:1.45; margin-top:2px; }
+  .window-item-desc b{ color:var(--blue-dark); }
+  .window-group-label{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; letter-spacing:.5px;
+    color:var(--blue-dark); text-transform:uppercase; margin:0 0 6px 2px;
+  }
+  .window-list-cards{ gap:14px; }
+  .window-list-cards .window-item{
+    background:var(--white); border-radius:14px; padding:14px 20px; box-shadow:var(--card-shadow);
+  }
+  .window-list-cards .window-item-title{ font-size:19px; }
+  .window-list-cards .window-item-desc{ font-size:13.5px; line-height:1.6; margin-top:5px; }
+  .window-list-cards-compact{ gap:8px; }
+  .window-list-cards-compact .window-item{
+    background:var(--white); border-radius:10px; padding:7px 14px; box-shadow:var(--card-shadow);
+  }
+  .window-list-cards-compact .window-item-title{ font-size:15px; }
+  .window-list-cards-compact .window-item-desc{ font-size:11.5px; line-height:1.4; margin-top:2px; }
+
+  /* ---------- Hierarchy / Inspector 창 (텍스트 옆에 세로로 긴 스크린샷) ---------- */
+  .hi-cols{ flex:1; display:flex; gap:44px; min-height:0; margin-top:8px; }
+  .hi-block{ flex:1; display:flex; gap:22px; min-width:0; }
+  .hi-text{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .hi-shot{ flex:0 0 auto; border-radius:8px; overflow:hidden; box-shadow:var(--card-shadow-lg); }
+  .hi-shot img{ display:block; height:100%; width:auto; max-width:none; max-height:none; margin:0; }
+
+  /* ---------- Panel overlay (특정 step에서만 나타나는 밈 / 콜아웃 / 오버레이, panel-stage 공용) ---------- */
+  .panel-overlay{ z-index:6; opacity:0; visibility:hidden; transition:opacity .3s ease; }
+  .panel-overlay.panel-visible{ opacity:1; visibility:visible; animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+  .panel-overlay-drop{ transform-origin:top; }
+  .panel-overlay-drop.panel-visible{ animation:overlayDrop .4s cubic-bezier(.22,.9,.32,1) both; }
+  @keyframes overlayDrop{
+    0%{ transform:scaleY(0); opacity:0; }
+    100%{ transform:scaleY(1); opacity:1; }
+  }
+  /* ---------- Game / Simulator 창 (좌측 텍스트+콜아웃, 우측 스크린샷 2장) ---------- */
+  .game-shot{ flex:1; min-width:0; position:relative; border-radius:8px; overflow:hidden; box-shadow:var(--card-shadow-lg); }
+  .game-shot > img{ display:block; width:100%; height:auto; max-width:none; max-height:none; margin:0; }
+  .game-callout-slot{ position:relative; width:100%; max-width:340px; height:190px; margin-top:16px; }
+
+  /* ---------- Animator / Animation 창 (우측 세로 스택, 폭은 상한 안에서 이미지 비율 유지) ---------- */
+  .game-shot-stack{ flex:1; min-height:0; border-radius:8px; overflow:hidden; box-shadow:var(--card-shadow-lg); background:#111; }
+  .game-shot-stack img{ display:block; width:100%; height:100%; object-fit:contain; max-width:none; max-height:none; margin:0; }
+
   /* ---------- Notice card (엔진 잠시 대기) ---------- */
   .notice-wrap{ flex:1; display:flex; align-items:center; justify-content:center; }
   .notice-card{
@@ -527,12 +631,11 @@
                 <div class="step-title">기획의 시작</div>
                 <div class="step-desc">게임을 만드는 사람들, <br>그리고 '기획'이라는 일.</div>
               </div>
-              <div class="step-card muted" style="--c:var(--ink-faint);">
+              <div class="step-card" style="--c:var(--grass-dark);">
                 <div class="step-icon">⚙️</div>
                 <div class="step-label">PART 3 · 엔진</div>
-                <div class="step-title">이번 주는 쉬어갑니다</div>
-                <div class="step-desc">기획에 집중하는 주간!<br>이유는 뒤에서 설명할게요.</div>
-                <div class="step-badge">PAUSED THIS WEEK</div>
+                <div class="step-title">유니티 에디터 구조</div>
+                <div class="step-desc">간단한 유니티 엔진 구경.</div>
               </div>
             </div>
           </div>
@@ -583,12 +686,12 @@
     <section>
       <div class="slide-shell" data-page="05">
         <div class="body-wrap">
-          <h2 class="section-title">'게임 개발자'는, <span class="emph">이런 사람</span>을 말했다</h2>
+          <h2 class="section-title">'게임 개발자'는, <span class="emph">이런 사람</span>이었어요.</h2>
           <div class="reveal-stage">
             <div class="reveal-trigger">
               <div class="notice-emoji">🕹️</div>
-              <div class="notice-title">태초에..!</div>
-              <div class="notice-desc">기획도, 아트도, 코드도 — 혼자 다 하던 시절이 있었습니다.👆</div>
+              <div class="notice-title">처음엔..!</div>
+              <div class="notice-desc">기획도, 아트도, 코드도 — 혼자 다 했어요.<br>심지어 기획, 아트, 코딩 이라는 역할의 구분도 없었어요. 👆</div>
             </div>
             <img class="reveal-image" src="Midias/w2/5-1.gif" alt="">
             <img class="reveal-image" src="Midias/w2/5-2.png" alt="">
@@ -732,8 +835,9 @@
 
     <!-- ============ 쉬는시간 ============ -->
     <section class="plain-white">
-      <div class="slide-shell" style="justify-content:center; align-items:center; padding:40px;">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
         <img src="Midias/letswrapituphere.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
       </div>
     </section>
 
@@ -784,12 +888,13 @@
               </div>
             </div>
             <div class="role-panel">
-              <div class="role-group-title" style="--c:var(--grass-dark);"><span class="dot"></span>기술 · 운영</div>
+              <div class="role-group-title" style="--c:var(--grass-dark);"><span class="dot"></span>서비스 기획</div>
               <div class="role-cloud">
                 <span class="role-chip" style="--c:var(--grass);">이벤트 기획</span>
-                <span class="role-chip" style="--c:var(--grass);">데이터 기획</span>
                 <span class="role-chip" style="--c:var(--grass);">BM 기획</span>
-                <span class="role-chip" style="--c:var(--grass);">서비스 기획</span>
+                <span class="role-chip" style="--c:var(--grass);">고객 관리(CRM)</span>
+                <span class="role-chip" style="--c:var(--grass);">라이브 오퍼레이션 기획</span>
+                <span class="role-chip" style="--c:var(--grass);">그로스 기획</span>
               </div>
             </div>
             <div class="role-panel">
@@ -800,7 +905,7 @@
                 <span class="role-chip" style="--c:var(--pink-dark);">Project Manager</span>
                 <span class="role-chip" style="--c:var(--pink-dark);">Data Analyst</span>
                 <span class="role-chip" style="--c:var(--pink-dark);">QA</span>
-                <span class="role-chip" style="--c:var(--pink-dark);">Tester</span>
+                <span class="role-chip" style="--c:var(--pink-dark);">QC - Tester</span>
                 <span class="role-chip" style="--c:var(--pink-dark);">Marketer</span>
                 <span class="role-chip" style="--c:var(--pink-dark);">CM (커뮤니티 매니저)</span>
                 <span class="role-chip" style="--c:var(--pink-dark);">Localization</span>
@@ -866,9 +971,37 @@
       </div>
     </section>
 
-    <!-- ============ 필요 역량 #03 (열린 토론) ============ -->
+    <!-- ============ 게임 기획 vs 서비스 기획 ============ -->
     <section>
       <div class="slide-shell" data-page="14">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">방금 본 역량들, <span class="emph">어디에 더</span> 필요할까요?</h2>
+          <div class="doc-columns">
+            <div class="doc-card">
+              <div class="doc-title">게임 기획 <span class="tag">Game Design</span></div>
+              <div class="doc-section"><div class="d-label">목적</div><div class="d-line">재미있는 게임을 만든다.</div></div>
+              <div class="doc-section"><div class="d-label">시점</div><div class="d-line">출시 전 (Pre-launch).</div></div>
+              <div class="doc-section"><div class="d-label">산출물</div><div class="d-line">GDD · 시스템 / 밸런스 기획서.</div></div>
+              <div class="doc-section"><div class="d-label">핵심 질문</div><div class="d-line">이 게임, 왜 재미있어야 하지?</div></div>
+              <div class="doc-section"><div class="d-label">특히 중요한 역량</div><div class="d-line">창의력 · 시스템 사고 · 수리 능력 · 밸런스 감각.</div></div>
+            </div>
+            <div class="doc-card">
+              <div class="doc-title">서비스 기획 <span class="tag">Service Planning</span></div>
+              <div class="doc-section"><div class="d-label">목적</div><div class="d-line">게임을 오래, 잘 운영한다.</div></div>
+              <div class="doc-section"><div class="d-label">시점</div><div class="d-line">출시 후 (Live).</div></div>
+              <div class="doc-section"><div class="d-label">산출물</div><div class="d-line">이벤트 기획서 · 운영 일정표 · BM / 데이터 리포트.</div></div>
+              <div class="doc-section"><div class="d-label">핵심 질문</div><div class="d-line">유저가 왜 내일도 접속해야 하지?</div></div>
+              <div class="doc-section"><div class="d-label">특히 중요한 역량</div><div class="d-line">데이터 분석 · 커뮤니케이션 · 다양한 학문(경제/심리) · 일정 관리.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="margin-top:16px; text-align:center; font-size:13px;">실무에선 두 역할이 자주 겹칩니다 — 특히 모바일 라이브 서비스 게임일수록 '서비스 기획' 비중이 커지는 추세예요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 지속 학습 (열린 토론) ============ -->
+    <section>
+      <div class="slide-shell" data-page="15">
         <div class="reveal-stage">
           <img class="reveal-image" src="Midias/w2/14-1.png" alt="">
           <img class="reveal-image" src="Midias/w2/14-2.png" alt="">
@@ -878,7 +1011,7 @@
 
     <!-- ============ 기획자가 하는 일 ============ -->
     <section>
-      <div class="slide-shell" data-page="15">
+      <div class="slide-shell" data-page="16">
         <div class="body-wrap">
           <h2 class="section-title">기획자가 하는 <span class="emph">일</span></h2>
           <div class="reveal-stage">
@@ -899,7 +1032,7 @@
 
     <!-- ============ 한 장 기획서 ============ -->
     <section>
-      <div class="slide-shell" data-page="16">
+      <div class="slide-shell" data-page="17">
         <div class="body-wrap">
           <h2 class="section-title"><span class="emph">한 장</span> 기획서</h2>
           <div class="obj-grid">
@@ -922,7 +1055,7 @@
 
     <!-- ============ 한 장 기획서 예제 #01 ============ -->
     <section>
-      <div class="slide-shell" data-page="17">
+      <div class="slide-shell" data-page="18">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">한 장 기획서 <span class="emph">예제</span> #01</h2>
           <div class="doc-columns">
@@ -949,7 +1082,7 @@
 
     <!-- ============ 한 장 기획서 예제 #02 ============ -->
     <section>
-      <div class="slide-shell" data-page="18">
+      <div class="slide-shell" data-page="19">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">한 장 기획서 <span class="emph">예제</span> #02</h2>
           <div class="doc-columns">
@@ -971,15 +1104,15 @@
 
     <!-- ============ 작업 계획서 (WBS) ============ -->
     <section>
-      <div class="slide-shell" data-page="19">
+      <div class="slide-shell" data-page="20">
         <div class="body-wrap">
           <h2 class="section-title">작업 계획서 <span class="emph">( 작업 분류 체계 )</span></h2>
-          <div class="intro-note" style="margin-top:6px; font-size:14px;"><br><br>WBS(Work Breakdown Structure) — 전체 작업을 <b>실행 가능한 단위</b>까지 계층적으로 쪼개어 정리한 문서입니다.</div>
+          <div class="intro-note" style="margin-top:6px; font-size:14px;"><br>WBS(Work Breakdown Structure) — 전체 작업을 <b>실행 가능한 단위</b>까지 계층적으로 쪼개어 정리한 문서입니다.</div>
           <div class="why-list" style="margin-top:24px;">
-            <div class="why-item"><span class="check">✓</span>업무를 시각적으로 표현</div>
-            <div class="why-item"><span class="check">✓</span>비용과 시간을 명확하게 추정 가능</div>
-            <div class="why-item"><span class="check">✓</span>진행 상황 파악 &amp; 다른 작업자와의 스케쥴 파악에 용이</div>
-            <div class="why-item"><span class="check">✓</span>구성원 간 커뮤니케이션 증가 → 생산성 향상 &gt;&gt; 비용 감소</div>
+            <div class="why-item"><span class="check">✓</span>업무를 시각적으로 표현.</div>
+            <div class="why-item"><span class="check">✓</span>비용과 시간을 명확하게 추정 가능.</div>
+            <div class="why-item"><span class="check">✓</span>진행 상황 파악 &amp; 다른 작업자와의 스케쥴 파악에 용이.</div>
+            <div class="why-item"><span class="check">✓</span>구성원 간 커뮤니케이션 증가 → 생산성 향상 &gt;&gt; 비용 감소.</div>
           </div>
           <div class="intro-note" style="margin-top:22px; text-align:center; font-size:14px;">왜? 무엇을 위해? 그 기대 효과는 무엇일까요?</div>
         </div>
@@ -988,7 +1121,7 @@
 
     <!-- ============ WBS 예제 ============ -->
     <section>
-      <div class="slide-shell" data-page="20">
+      <div class="slide-shell" data-page="21">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">WBS <span class="emph">예제</span></h2>
           <div style="display:flex; gap:16px; margin-top:16px; flex:1; min-height:0; align-items:stretch;">
@@ -1011,28 +1144,28 @@
 
     <!-- ============ 바이블 ============ -->
     <section>
-      <div class="slide-shell" data-page="21">
+      <div class="slide-shell" data-page="22">
         <div class="teaser-wrap">
           <div class="teaser-icon">
             <span class="power-emoji" style="font-size:64px;">📖</span>
           </div>
-          <div class="teaser-question small"><span class="emph">'바이블'</span>이란, 무엇일까요?</div>
-          <div class="teaser-caption mono">게임 기획의 또 다른 문서, 바이블의 정의</div>
+          <div class="teaser-question small"><span class="emph">바이블</span>이란, 무엇일까요?</div>
+          <div class="teaser-caption mono">게임 기획의 또 다른 핵심.</div>
         </div>
       </div>
     </section>
 
     <!-- ============ 바이블, 왜 필요할까 ============ -->
     <section>
-      <div class="slide-shell" data-page="22">
+      <div class="slide-shell" data-page="23">
         <div class="body-wrap">
           <h2 class="section-title">바이블, <span class="emph">왜</span> 필요할까요?</h2>
-          <div class="intro-note" style="margin-top:6px; font-size:14px;">기획의 모든 결정과 설정을 한 곳에 모아, <b>프로젝트 내내</b> 참고하는 통합 문서입니다.</div>
+          <div class="intro-note" style="margin-top:6px; font-size:14px;"><br>기획의 모든 결정과 설정을 한 곳에 모아, <b>프로젝트 내내</b> 참고하는 통합 문서입니다.</div>
           <div class="why-list" style="margin-top:24px;">
-            <div class="why-item"><span class="check">✓</span>팀 전체가 같은 기준으로 작업 — 설정 충돌 / 중복 방지</div>
-            <div class="why-item"><span class="check">✓</span>중간에 합류한 인원도 문서만 보고 빠르게 맥락 파악</div>
-            <div class="why-item"><span class="check">✓</span>프로젝트가 커질수록, 기억이 아니라 문서에 의존</div>
-            <div class="why-item"><span class="check">✓</span>이후 수정 / 확장할 때도 흔들리지 않는 기준점 역할</div>
+            <div class="why-item"><span class="check">✓</span>팀 전체가 같은 기준으로 작업 — 설정 충돌 / 중복 방지.</div>
+            <div class="why-item"><span class="check">✓</span>중간에 합류한 인원도 문서만 보고 빠르게 맥락 파악.</div>
+            <div class="why-item"><span class="check">✓</span>프로젝트가 커질수록, 기억이 아니라 문서에 의존.</div>
+            <div class="why-item"><span class="check">✓</span>이후 수정 / 확장할 때도 흔들리지 않는 기준점 역할.</div>
           </div>
         </div>
       </div>
@@ -1040,7 +1173,7 @@
 
     <!-- ============ 바이블에 담기는 것들 ============ -->
     <section>
-      <div class="slide-shell" data-page="23">
+      <div class="slide-shell" data-page="24">
         <div class="body-wrap">
           <h2 class="section-title">바이블에 <span class="emph">담기는</span> 것들</h2>
           <div class="obj-grid">
@@ -1067,18 +1200,18 @@
 
     <!-- ============ 그런데, 요즘은 ============ -->
     <section>
-      <div class="slide-shell" data-page="24">
+      <div class="slide-shell" data-page="25">
         <div class="break-body">
           <div class="break-eyebrow">지금까지 얘기한 기획서 · WBS · 바이블, 그 다음은..</div>
-          <h2 class="break-hero">이젠 기획자에게 더 <span class="emph">많고 깊은</span> 것들이 맡겨지고 있어요.<br>AI 를 사용하고 <span class="emph">오케스트레이션</span>합니다</h2>
-          <div class="break-sub">지금까지 다룬 건 <span class="accent">기본기</span>입니다. 이 수업은 트렌드보다 기본을 먼저, 확실히 다집니다.<br>다만 현업이 이렇게 바뀌었다는 건 — 여러분이 <b>명확히</b> 알고 있어야 합니다.</div>
+          <h2 class="break-hero">이제 기획자는 <br><span class="emph">더 많고</span>, <span class="emph">깊은 것들</span>을<br><span class="emph">오케스트레이션</span><br>해야만 합니다.</h2>
+          <!--div class="break-sub">지금까지 다룬 건 <span class="accent">기본기</span>입니다.<br>수업 중 모든 이야기를 할 수 없겠지만,<br>무엇보다 중요한 건 기반을 튼튼하게 하는 것이에요.<br>다만 현업이 이렇게 바뀌었다는 건 — 여러분이 <b>명확히</b> 알고 있어야 합니다.</div-->
         </div>
       </div>
     </section>
 
     <!-- ============ PART 3 전환 ============ -->
     <section>
-      <div class="slide-shell" data-page="25">
+      <div class="slide-shell" data-page="26">
         <div class="break-body">
           <div class="break-eyebrow">PART 3 · 엔진</div>
           <h2 class="break-hero">그럼, <span class="emph">엔진</span>은요?</h2>
@@ -1087,14 +1220,266 @@
       </div>
     </section>
 
-    <!-- ============ 엔진 잠시 대기 ============ -->
+    <!-- ============ 쉬는시간 ============ -->
+    <section class="plain-white">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
+        <img src="Midias/letswrapituphere.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
+      </div>
+    </section>
+
+    <!-- ============ 유니티 프로젝트 생성 ============ -->
     <section>
-      <div class="slide-shell" data-page="26">
-        <div class="notice-wrap">
-          <div class="notice-card">
-            <div class="notice-emoji">⏸️</div>
-            <div class="notice-title">이번 주는 엔진을 잠시 쉬어갑니다</div>
-            <div class="notice-desc">기획의 기초를 <b>충분히 다지는 것</b>이 먼저입니다.<br>엔진 실습은 다음 시간부터, 기획과 함께 다시 이어갈게요.</div>
+      <div class="slide-shell" data-page="27">
+        <div class="body-wrap">
+          <h2 class="section-title">유니티 프로젝트, <span class="emph">이렇게</span> 시작할까요?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">Unity Hub로 새 프로젝트 생성</div>
+              <div class="feature-desc">템플릿(2D / 3D / URP 등) 선택은 우리 팀 프로젝트 성격에 맞춰서.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">저장 경로 주의</div>
+              <div class="feature-desc">경로에 한글 / 공백 넣지 않기, OneDrive 같은 동기화 폴더 밖에 저장 — 안 그러면 파일 잠금 / 손상이 자주 발생해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">에디터 버전 통일</div>
+              <div class="feature-desc">팀원마다 버전이 다르면 협업 중 충돌 / 오류가 발생하기 쉬워요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">필요한 패키지 미리 설치</div>
+              <div class="feature-desc">Package Manager에서 TextMeshPro, Input System 등 팀에서 쓸 패키지를 확인하고 설치해요.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 에디터 살펴보기 ============ -->
+    <section>
+      <div class="slide-shell" data-page="28">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+          <h2 class="section-title"><span class="emph">에디터</span> 구성은 이렇게 되어있죠?</h2>
+          <div class="editor-stage">
+            <div class="editor-card">
+              <div class="editor-card-title"></div>
+              <div class="editor-card-desc">이미지를 클릭해서 살펴보세요</div>
+            </div>
+            <div class="editor-canvas">
+              <div class="editor-slot" data-name="Scene" data-desc="게임 월드를 직접 배치하고 편집하는 작업 공간." style="left:822px; top:0px; width:243px; height:170px;"><img class="editor-img" src="Midias/w2/28-Scene.png"></div>
+              <div class="editor-slot" data-name="Game" data-desc="실제 플레이어 시점 — 카메라가 보는 화면 미리보기." style="left:565px; top:0px; width:174px; height:306px;"><img class="editor-img" src="Midias/w2/28-Game.png"></div>
+              <div class="editor-slot" data-name="Hierarchy" data-desc="현재 씬에 있는 모든 게임 오브젝트의 목록 / 구조." style="left:739px; top:0px; width:83px; height:306px;"><img class="editor-img" src="Midias/w2/28-Hierarchy.png"></div>
+              <div class="editor-slot" data-name="Inspector" data-desc="선택한 오브젝트의 컴포넌트와 속성을 확인 / 수정." style="left:1065px; top:0px; width:96px; height:306px;"><img class="editor-img" src="Midias/w2/28-Inspector.png"></div>
+              <div class="editor-slot" data-name="Project" data-desc="프로젝트에 포함된 모든 에셋 파일 탐색기." style="left:822px; top:170px; width:243px; height:136px;"><img class="editor-img" src="Midias/w2/28-Project.png"></div>
+              <div class="editor-slot" data-name="Animation" data-desc="선택한 오브젝트의 애니메이션 키프레임을 직접 편집하는 창." style="left:0px; top:0px; width:282px; height:112px;"><img class="editor-img" src="Midias/w2/28-Animation.png"></div>
+              <div class="editor-slot" data-name="Animator" data-desc="애니메이션 상태(State)들을 연결해 전환 조건을 설계하는 상태 머신." style="left:0px; top:112px; width:282px; height:114px;"><img class="editor-img" src="Midias/w2/28-Animator.png"></div>
+              <div class="editor-slot" data-name="Audio Mixer" data-desc="여러 사운드 그룹의 볼륨 / 이펙트를 채널별로 조절하는 믹서." style="left:0px; top:226px; width:282px; height:80px;"><img class="editor-img" src="Midias/w2/28-AudioMixer.png"></div>
+              <div class="editor-slot" data-name="Visual Studio" data-desc="C# 스크립트를 작성하고 디버깅하는 코드 에디터." style="left:282px; top:0px; width:283px; height:306px;"><img class="editor-img" src="Midias/w2/28-VisualStudio.png"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Scene 패널 ============ -->
+    <section>
+      <div class="slide-shell" data-page="29">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0; justify-content:center; align-items:center;">
+          <div class="panel-stage" style="width:1160px; height:574px; margin:0 auto;">
+            <h2 class="panel-heading">Scene</h2>
+            <div class="panel-piece" style="left:0px; top:54px; width:607px; height:520px;"><img src="Midias/w2/29-panel.png" alt=""></div>
+            <div class="panel-piece panel-callout" style="left:640px; top:54px; width:314px; height:45px;"><img src="Midias/w2/29-control.png" alt=""></div>
+            <div class="panel-piece panel-callout" style="left:964px; top:54px; width:168px; height:45px;"><img src="Midias/w2/29-2d.png" alt=""></div>
+            <div class="panel-piece panel-overlay" data-step="1" style="left:190px; top:94px; width:780px; height:440px;"><img src="Midias/w2/29-QWER.gif" alt=""></div>
+            <div class="panel-piece panel-callout panel-overlay" data-step="2" style="left:617px; top:109px; width:264px; height:227px;"><img src="Midias/w2/29-w.png" alt=""></div>
+            <div class="panel-piece panel-callout panel-overlay" data-step="2" style="left:891px; top:109px; width:264px; height:227px;"><img src="Midias/w2/29-e.png" alt=""></div>
+            <div class="panel-piece panel-callout panel-overlay" data-step="2" style="left:617px; top:346px; width:264px; height:227px;"><img src="Midias/w2/29-r.png" alt=""></div>
+            <div class="panel-piece panel-callout panel-overlay" data-step="2" style="left:891px; top:346px; width:264px; height:227px;"><img src="Midias/w2/29-t.png" alt=""></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Project / Console 창 ============ -->
+    <section>
+      <div class="slide-shell" data-page="30">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+          <div class="window-cols">
+            <div class="window-col">
+              <h2 class="panel-heading" style="position:static; font-size:34px !important;">Project</h2>
+              <div class="window-shot"><img src="Midias/w2/30-project.png" alt=""></div>
+              <div class="window-list window-list-cards-compact">
+                <div class="window-item">
+                  <div class="window-item-title">Resource</div>
+                  <div class="window-item-desc">Resources 폴더 안 에셋은 참조 연결 없이 Resources.Load()로 런타임에 직접 불러올 수 있어요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Editor</div>
+                  <div class="window-item-desc">Editor 폴더 안 스크립트는 에디터에서만 동작하고, 빌드에는 포함되지 않아요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Plug-ins</div>
+                  <div class="window-item-desc">dll 같은 네이티브 라이브러리나 외부 SDK를 넣는 폴더예요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Hidden</div>
+                  <div class="window-item-desc">Unity가 자동으로 감춰서 에셋으로 취급하지 않는 파일 / 폴더예요 — 이름이 <b>.</b> 또는 <b>~</b>로 시작하거나 <b>.tmp</b>로 끝나면 Project 창에 아예 보이지 않아요.</div>
+                </div>
+              </div>
+            </div>
+            <div class="window-col">
+              <h2 class="panel-heading" style="position:static; font-size:34px !important;">Console</h2>
+              <div class="window-list window-list-cards-compact">
+                <div class="window-item">
+                  <div class="window-item-title">Collapse</div>
+                  <div class="window-item-desc">같은 로그가 여러 번 찍혀도 한 줄로 묶어서 보여줘요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Error Pause</div>
+                  <div class="window-item-desc">에러 로그가 찍히는 순간 자동으로 Play가 멈춰요 — 원인 상태를 바로 확인할 수 있어요.</div>
+                </div>
+              </div>
+              <div class="window-shot window-shot-callout"><img src="Midias/w2/30-console-menu.png" alt=""></div>
+              <div class="window-shot"><img src="Midias/w2/30-console.png" alt=""></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Hierarchy / Inspector 창 ============ -->
+    <section>
+      <div class="slide-shell" data-page="31">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+          <div class="hi-cols">
+            <div class="hi-block">
+              <div class="hi-text">
+                <h2 class="panel-heading" style="position:static; font-size:32px !important;">Hierarchy</h2>
+                <div class="window-group-label">구조화 예시 — 루트 오브젝트 정리</div>
+                <div class="window-list window-list-cards-compact">
+                  <div class="window-item">
+                    <div class="window-item-title">Base</div>
+                    <div class="window-item-desc">씬의 최상위 루트 오브젝트예요 — 그 아래 UIsRoot / ObjsRoot를 자식으로 둬요.</div>
+                  </div>
+                  <div class="window-item">
+                    <div class="window-item-title">UIsRoot</div>
+                    <div class="window-item-desc">Base의 자식. Canvas 등 UI 오브젝트만 모아둬요.</div>
+                  </div>
+                  <div class="window-item">
+                    <div class="window-item-title">ObjsRoot</div>
+                    <div class="window-item-desc">Base의 자식. 캐릭터 / 아이템 등 게임 오브젝트를 모아둬요.</div>
+                  </div>
+                </div>
+                <div class="window-group-label" style="margin-top:16px;">검색창 문법</div>
+                <div class="window-list window-list-cards-compact">
+                  <div class="window-item">
+                    <div class="window-item-title">t:type</div>
+                    <div class="window-item-desc">타입으로 필터링해요. (예: t:Camera → 카메라만 표시)</div>
+                  </div>
+                  <div class="window-item">
+                    <div class="window-item-title">ref:path/asset</div>
+                    <div class="window-item-desc">특정 에셋(예: 프리팹)을 참조 중인 오브젝트만 찾아줘요.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="hi-shot"><img src="Midias/w2/31-hierarchy.png" alt=""></div>
+            </div>
+            <div class="hi-block">
+              <div class="hi-text">
+                <h2 class="panel-heading" style="position:static; font-size:32px !important;">Inspector</h2>
+                <div class="window-list window-list-cards-compact">
+                  <div class="window-item">
+                    <div class="window-item-title">선택한 오브젝트의 정보</div>
+                    <div class="window-item-desc">Hierarchy나 Scene에서 클릭한 오브젝트의 컴포넌트 / 속성이 여기 나와요.</div>
+                  </div>
+                  <div class="window-item">
+                    <div class="window-item-title">컴포넌트 추가 / 제거</div>
+                    <div class="window-item-desc">Add Component로 기능을 붙이고 뗄 수 있어요.</div>
+                  </div>
+                  <div class="window-item">
+                    <div class="window-item-title">값 직접 수정</div>
+                    <div class="window-item-desc">코드를 안 고치고도 여기서 수치를 바로 바꿔서 테스트할 수 있어요.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="hi-shot"><img src="Midias/w2/31-inspector.png" alt=""></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Game / Simulator 창 ============ -->
+    <section>
+      <div class="slide-shell" data-page="32">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+          <div class="panel-stage" style="flex:1; display:flex; gap:28px; min-height:0;">
+            <div class="hi-text" style="flex:0 0 300px;">
+              <h2 class="panel-heading" style="position:static; font-size:32px !important;">Game</h2>
+              <div class="window-list window-list-cards">
+                <div class="window-item">
+                  <div class="window-item-title">Game / Simulator</div>
+                  <div class="window-item-desc">Game(에디터용 미리보기)과 Simulator(실제 기기 화면 비율 / 노치까지 반영한 미리보기)를 전환해요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Resolution</div>
+                  <div class="window-item-desc">화면 해상도 / 비율 프리셋을 바꿔가며 다양한 기기에서 어떻게 보일지 테스트해요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Stats</div>
+                  <div class="window-item-desc">FPS, 배치(Draw Call), 폴리곤 수 같은 성능 통계를 실시간으로 보여줘요.</div>
+                </div>
+              </div>
+              <div class="game-callout-slot">
+                <div class="panel-piece panel-overlay panel-overlay-drop" data-step="1" data-persist style="left:0; top:0; width:100%; height:100%;"><img src="Midias/w2/32-gamesim-menu.png" alt=""></div>
+              </div>
+            </div>
+            <div class="game-shot" style="position:relative;">
+              <img src="Midias/w2/32-game.png" alt="">
+              <div class="panel-piece panel-overlay panel-overlay-drop" data-step="2" data-persist style="left:8%; top:0; width:60%; height:80%;"><img src="Midias/w2/32-resolution-menu.png" alt=""></div>
+            </div>
+            <div class="game-shot" style="position:relative;">
+              <img src="Midias/w2/32-simulator.png" alt="">
+              <div class="panel-piece panel-overlay panel-overlay-drop" data-step="3" data-persist style="left:0; top:0; width:100%; height:260px;"><img src="Midias/w2/32-stats.png" alt=""></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Animator / Animation 창 ============ -->
+    <section>
+      <div class="slide-shell" data-page="33">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+          <div class="panel-stage" style="flex:1; display:flex; gap:28px; min-height:0; position:relative;">
+            <div class="hi-text" style="flex:1;">
+              <h2 class="panel-heading" style="position:static; font-size:28px !important;">Animator / Animation</h2>
+              <div class="window-list window-list-cards">
+                <div class="window-item">
+                  <div class="window-item-title">Mecanim</div>
+                  <div class="window-item-desc">Unity의 애니메이션 시스템 전체를 가리키는 이름이에요 — Animator/Animation 창, 상태 머신, 블렌드 트리를 포함해요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Finite State Machine</div>
+                  <div class="window-item-desc">캐릭터의 동작을 여러 '상태'로 나누고, 조건에 따라 상태끼리 전환해요. (Idle → Move → Jump)</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Parameters</div>
+                  <div class="window-item-desc">상태 전환 조건으로 쓰는 변수예요 (Float / Int / Bool / Trigger). 코드에서 값을 바꿔 상태를 제어해요.</div>
+                </div>
+                <div class="window-item">
+                  <div class="window-item-title">Blend Tree</div>
+                  <div class="window-item-desc">파라미터 값에 따라 여러 애니메이션을 자연스럽게 섞어서 재생해요. (예: 이동속도에 따라 걷기 ↔ 달리기)</div>
+                </div>
+              </div>
+            </div>
+            <div class="hi-text" style="flex:1 1 480px; max-width:55%; gap:16px; min-height:0;">
+              <div class="game-shot-stack"><img src="Midias/w2/33-animation.png" alt=""></div>
+              <div class="game-shot-stack"><img src="Midias/w2/33-animator.png" alt=""></div>
+            </div>
+            <div class="panel-piece panel-callout panel-callout-fit panel-overlay" data-step="1"><img src="Midias/w2/33-parameters-menu.png" alt=""></div>
+            <div class="panel-piece panel-callout panel-callout-fit panel-overlay" data-step="2"><img src="Midias/w2/33-blendtree.png" alt=""></div>
+            <div class="panel-piece panel-callout panel-callout-fit panel-overlay" data-step="3"><img src="Midias/w2/33-inspector.png" alt=""></div>
           </div>
         </div>
       </div>
@@ -1102,21 +1487,25 @@
 
     <!-- ============ 다음 주제 ============ -->
     <section>
-      <div class="slide-shell" data-page="27">
-        <div class="teaser-wrap">
-          <div class="teaser-icon">
-            <span class="power-emoji" style="font-size:64px;">🔜</span>
+      <div class="slide-shell" data-page="34">
+        <div class="body-wrap">
+          <h2 class="section-title">다음 주는, 이 <span class="emph">질문</span>으로 시작합니다.</h2>
+          <div class="teaser-wrap">
+            <div class="teaser-icon" style="width:350px; height:350px;">
+              <img src="Midias/w2/basket.png" alt="" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15));">
+            </div>
+            <div class="teaser-question"><span class="emph">양동이</span>는 왜 이렇게 생겼을까?</div>
+            <div class="teaser-caption mono">NEXT WEEK · ICE BREAKING</div>
           </div>
-          <div class="teaser-question small">다음 주는, <span class="emph">기획</span>을 이어가며 시작합니다</div>
-          <div class="teaser-caption mono">NEXT WEEK</div>
         </div>
       </div>
     </section>
 
     <!-- ============ Let's call it a day ============ -->
     <section class="plain-white">
-      <div class="slide-shell" style="justify-content:center; align-items:center; padding:40px;">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
         <img src="Midias/letscallitaday.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
       </div>
     </section>
 
@@ -1125,7 +1514,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script>
-  const TOTAL_PAGES = 27;
+  const TOTAL_PAGES = 34;
   const FOOTER_TAG = 'WEEK 02';
 
   document.querySelectorAll('.reveal-stage').forEach(stage => {
@@ -1286,6 +1675,54 @@
       line23.classList.toggle('dev-visible', showLines3);
       linkTag.classList.toggle('dev-visible', showLines3);
       card3.classList.toggle('dev-visible', showLines3);
+    };
+    render();
+    stage.addEventListener('click', () => {
+      step = (step + 1) % TOTAL_STEPS;
+      render();
+    });
+  });
+
+  document.querySelectorAll('.editor-stage').forEach(stage => {
+    const card = stage.querySelector('.editor-card');
+    const titleEl = card.querySelector('.editor-card-title');
+    const descEl = card.querySelector('.editor-card-desc');
+    const slots = Array.from(stage.querySelectorAll('.editor-slot'));
+    const EMPTY_TEXT = '이미지를 클릭해서 살펴보세요';
+
+    const render = (active) => {
+      slots.forEach(slot => {
+        slot.classList.toggle('editor-active', slot === active);
+        slot.classList.toggle('editor-dim', !!active && slot !== active);
+      });
+      card.classList.toggle('editor-card-active', !!active);
+      titleEl.textContent = active ? active.dataset.name : '';
+      descEl.textContent = active ? active.dataset.desc : EMPTY_TEXT;
+    };
+    render(null);
+
+    slots.forEach(slot => {
+      slot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        render(slot);
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.editor-slot')) render(null);
+    });
+  });
+
+  document.querySelectorAll('.panel-stage').forEach(stage => {
+    const overlays = Array.from(stage.querySelectorAll('[data-step]'));
+    const maxStep = overlays.reduce((m, el) => Math.max(m, parseInt(el.dataset.step, 10)), 0);
+    const TOTAL_STEPS = maxStep + 1;
+    let step = 0;
+    const render = () => {
+      overlays.forEach(el => {
+        const s = parseInt(el.dataset.step, 10);
+        const visible = el.hasAttribute('data-persist') ? step >= s : step === s;
+        el.classList.toggle('panel-visible', visible);
+      });
     };
     render();
     stage.addEventListener('click', () => {
