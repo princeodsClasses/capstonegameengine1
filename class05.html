@@ -736,15 +736,15 @@
           <div class="obj-grid">
             <div class="feature-card"><div class="feature-num mono">01</div>
               <div><div class="feature-title">정의</div>
-              <div class="feature-desc">부모(기반) 클래스의 필드 · 메서드를, 자식(파생) 클래스가 그대로 물려받는 것.</div></div>
+              <div class="feature-desc">부모 ( 기반 ) 클래스의 필드 · 메서드를, 자식 ( 파생 ) 클래스가 그대로 물려받는 것.</div></div>
             </div>
             <div class="feature-card"><div class="feature-num mono">02</div>
               <div><div class="feature-title">구현 상속 ( Implementation Inheritance )</div>
-              <div class="feature-desc"><b>class Child : Parent</b> — 구현(코드)까지 그대로 물려받아요. C#에서는 부모 클래스 하나만 상속받을 수 있어요(단일 상속).</div></div>
+              <div class="feature-desc"><b>class Child : Parent</b> — 구현 ( 코드 ) 까지 그대로 물려받아요. C#에서는 부모 클래스 하나만 상속받을 수 있어요 ( 단일 상속 ).</div></div>
             </div>
             <div class="feature-card"><div class="feature-num mono">03</div>
               <div><div class="feature-title">인터페이스 상속 ( Interface Inheritance )</div>
-              <div class="feature-desc"><b>class Child : IInterface</b> — 규칙(메서드 이름)만 물려받고, 구현은 직접 채워야 해요. 여러 개를 한 번에 구현할 수 있어요.</div></div>
+              <div class="feature-desc"><b>class Child : IInterface</b> — 규칙 ( 시그니쳐 )만 물려받고, 구현은 직접 채워야 해요. 클래스와 다르게 동시에 여러 인터페이스들를 상속받을 수 있어요.</div></div>
             </div>
             <div class="feature-card"><div class="feature-num mono">04</div>
               <div><div class="feature-title">그래서, 둘 다 ":" 지만</div>
@@ -858,7 +858,10 @@
             <div class="doc-card" style="flex:1;">
               <div class="doc-title" style="font-size:20px;">I피해처리 <span class="tag">규칙만 물려줌</span></div>
               <div class="doc-section">
-                <div class="doc-code"><span class="code-kw">interface</span> <span class="code-type">I피해처리</span> { <span class="code-kw">void</span> <span class="code-fn">피해를받으면</span>(<span class="code-kw">int</span> <span class="code-var">amount</span>); }
+                <div class="doc-code"><span class="code-kw">interface</span> <span class="code-type">I피해처리</span>
+{
+    <span class="code-kw">void</span> <span class="code-fn">피해를받으면</span>(<span class="code-kw">int</span> <span class="code-var">amount</span>);
+}
 
 <span class="code-kw">class</span> <span class="code-type">Player</span> : <span class="code-type">I피해처리</span>
 {
