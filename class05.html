@@ -51,6 +51,9 @@
   .cloud{ position:absolute; background:#fff; border-radius:50%; opacity:.6;
     animation: drift 2s ease-in-out infinite alternate; }
   @keyframes drift{ from{transform:translateX(0);} to{transform:translateX(50px);} }
+  .pill-wobble{ animation: pillWobble 1.8s ease-in-out infinite; transform-origin:50% 50%; }
+  @keyframes pillWobble{ 0%,100%{ transform:rotate(-6deg); } 50%{ transform:rotate(6deg); } }
+  html.print-pdf .pill-wobble{ animation:none !important; }
 
   /* ---------- top / bottom bars ---------- */
   .cs-header{
@@ -1175,14 +1178,14 @@
             <div class="doc-card">
               <div class="doc-title" style="font-size:26px;">오늘 <span class="tag">After</span></div>
               <div class="doc-section">
-                <div class="doc-code">TouchPrompt.prefab  <span class="code-cm">// 원본은 하나</span>
+                <div class="doc-code">PageBase.prefab  <span class="code-cm">// 원본은 하나</span>
   └─ Text: <span class="code-str">"터치하세요"</span>
 
-Title 씬  → TouchPrompt <span class="code-cm">인스턴스</span>
-Lobby 씬  → TouchPrompt <span class="code-cm">인스턴스</span>
-Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
+Title 씬  → PageBase > PageTitle <span class="code-cm">// 오버라이드 오브젝트</span>
+Lobby 씬  → PageBase > PageLobby <span class="code-cm">// 오버라이드 오브젝트</span>
+Play  씬  → PageBase > PagePlay  <span class="code-cm">// 오버라이드 오브젝트</span></div>
               </div>
-              <div class="doc-section" style="margin-top:14px;"><div class="d-label">TIP</div><div class="d-line placeholder">원본(TouchPrompt) 하나만 고치면, 세 씬의 인스턴스가 전부 한 번에 바뀌어요.</div></div>
+              <div class="doc-section" style="margin-top:14px;"><div class="d-label">TIP</div><div class="d-line placeholder">원본(PageBase) 하나만 고치면, 세 씬의 내용이 모두 한 번에 바뀌어요.</div></div>
             </div>
           </div>
         </div>
@@ -1258,7 +1261,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
     <section>
       <div class="slide-shell" data-page="22">
         <div class="body-wrap">
-          <h2 class="section-title">네스티드 프리팹, <span class="emph">왜</span> 쓸까요?</h2>
+          <h2 class="section-title">네스티드 프리팹 ( Nested Prefab ), <span class="emph">왜</span> 쓸까요?</h2>
           <div class="obj-grid">
             <div class="feature-card"><div class="feature-num mono">01</div>
               <div><div class="feature-title">상황</div>
@@ -1270,7 +1273,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
             </div>
             <div class="feature-card"><div class="feature-num mono">03</div>
               <div><div class="feature-title">그래서, 네스티드</div>
-              <div class="feature-desc"><b>PageBase</b>가 붙은 <b>Page</b> 프리팹 안에, <b>ButtonBase</b> 프리팹을 자식으로 넣어요.</div></div>
+              <div class="feature-desc"><b>Page</b> 프리팹 안에, <b>ButtonBase</b> 프리팹을 자식으로 넣어요.</div></div>
             </div>
             <div class="feature-card"><div class="feature-num mono">04</div>
               <div><div class="feature-title">핵심</div>
@@ -1285,7 +1288,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
     <section>
       <div class="slide-shell" data-page="23">
         <div class="body-wrap">
-          <h2 class="section-title">PageBase, <span class="emph">네스티드</span>로 만들어볼까요?</h2>
+          <h2 class="section-title"><span class="emph">네스티드</span>로 만들어볼까요?</h2>
           <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:18px;">
             <div class="step-card" style="--c:var(--blue-dark); flex:0 0 260px;">
               <div class="step-icon">1️⃣</div>
@@ -1316,7 +1319,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
     <section>
       <div class="slide-shell" data-page="24">
         <div class="body-wrap">
-          <h2 class="section-title">프리팹 버라이언트, <span class="emph">왜</span> 쓸까요?</h2>
+          <h2 class="section-title">프리팹 버라이언트 ( Prefab Variant ) 는 <span class="emph">왜</span> 쓸까요?</h2>
           <div class="obj-grid">
             <div class="feature-card"><div class="feature-num mono">01</div>
               <div><div class="feature-title">상황</div>
@@ -1400,7 +1403,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
           <div class="teaser-wrap" style="gap:24px;">
             <div style="display:flex; gap:28px; justify-content:center; flex-wrap:wrap;">
               <div style="flex:0 0 320px; background:var(--white); border-radius:20px; padding:28px 26px; box-shadow:var(--card-shadow-lg); text-align:center; border-top:8px solid var(--pink-dark);">
-                <svg viewBox="0 0 140 56" style="width:110px; height:44px; margin-bottom:10px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15));">
+                <svg class="pill-wobble" viewBox="0 0 140 56" style="width:110px; height:44px; margin-bottom:10px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15)); animation-delay:0s;">
                   <defs>
                     <linearGradient id="redPillGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stop-color="#ffffff"/>
@@ -1427,7 +1430,7 @@ Play  씬  → TouchPrompt <span class="code-cm">인스턴스</span></div>
                 <div style="font-size:13.5px; color:var(--ink-soft); line-height:1.6;">하지만, 아주 힘들고 위험해요.. ㅜㅜ</div>
               </div>
               <div style="flex:0 0 320px; background:var(--white); border-radius:20px; padding:28px 26px; box-shadow:var(--card-shadow-lg); text-align:center; border-top:8px solid var(--blue-dark);">
-                <svg viewBox="0 0 140 56" style="width:110px; height:44px; margin-bottom:10px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15));">
+                <svg class="pill-wobble" viewBox="0 0 140 56" style="width:110px; height:44px; margin-bottom:10px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15)); animation-delay:-.9s;">
                   <defs>
                     <linearGradient id="bluePillGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stop-color="#ffffff"/>
