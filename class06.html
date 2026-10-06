@@ -1194,9 +1194,87 @@ Destroy한다, 또는 풀링한다면 ResourceManager.Return으로 돌려보낸�
       </div>
     </section>
 
-    <!-- ============ 오늘 정리 ============ -->
+    <!-- ============ Projectile 상태 다이어그램 ============ -->
     <section>
       <div class="slide-shell" data-page="26">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">Projectile로도, <span class="emph">상태 다이어그램</span> 그려보면</h2>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:4px;">
+            <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:auto; height:100%; max-height:460px;">
+              <defs>
+                <marker id="fsmArrowP" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#3a5266"/>
+                </marker>
+                <marker id="fsmArrowBackP" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="rgba(27,43,58,.45)"/>
+                </marker>
+              </defs>
+
+              <g font-family="'Baloo 2', sans-serif" font-weight="700" font-size="19" text-anchor="middle">
+                <rect x="60" y="100" width="220" height="100" rx="16" fill="#f0f0f0" stroke="#3a5266" stroke-width="2.5"/>
+                <text x="170" y="155" fill="#3a5266">Pooled</text>
+
+                <rect x="420" y="100" width="220" height="100" rx="16" fill="#fff4da" stroke="#f2a900" stroke-width="2.5"/>
+                <text x="530" y="155" fill="#a06d00">Flying</text>
+              </g>
+
+              <!-- Pooled -> Flying -->
+              <line x1="286" y1="128" x2="414" y2="128" stroke="#3a5266" stroke-width="2.5" marker-end="url(#fsmArrowP)"/>
+              <text x="350" y="112" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="13" fill="#3a5266">Get() · 발사</text>
+
+              <!-- Flying -> Pooled -->
+              <line x1="414" y1="172" x2="286" y2="172" stroke="rgba(27,43,58,.45)" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#fsmArrowBackP)"/>
+              <text x="350" y="228" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="12.5" fill="rgba(27,43,58,.55)">수명 종료 · Wall 충돌 · Enemy 트리거<tspan x="350" dy="16">→ Return()</tspan></text>
+
+              <!-- 범례 -->
+              <g font-family="'Nunito', sans-serif" font-weight="700" font-size="11.5" fill="rgba(27,43,58,.6)">
+                <line x1="150" y1="280" x2="185" y2="280" stroke="#3a5266" stroke-width="2.5"/>
+                <text x="192" y="284">꺼내 쓰기 (Get)</text>
+                <line x1="360" y1="280" x2="395" y2="280" stroke="rgba(27,43,58,.45)" stroke-width="2" stroke-dasharray="5 5"/>
+                <text x="402" y="284">되돌리기 (Return)</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Projectile 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="27">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">Projectile</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#f2a900;">Flying <span class="tag">다음 시간 · StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">발사 방향으로 속도를 준다
+반환 타이머 시작 (수명 카운트다운)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">만약 반환 타이머가 끝났으면:
+    Pool로 전이 (Return)
+
+<span class="code-cm">// 충돌 / 트리거는, Enemy처럼 이벤트로 바로 처리돼요</span>
+만약 Wall에 충돌했다면 (OnCollisionEnter):
+    Pool로 전이 (Return)
+만약 Enemy에 닿았다면 (OnTriggerEnter):
+    Enemy.TakeDamage() 호출 후, Pool로 전이 (Return)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">속도를 멈춘다 (다음에 꺼내 쓸 때, 깨끗한 상태로 시작하도록)
+Destroy 대신, Owner.Return(this) — 풀로 돌아간다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘 정리 ============ -->
+    <section>
+      <div class="slide-shell" data-page="28">
         <div class="body-wrap">
           <h2 class="section-title">오늘, <span class="emph">이 것들</span>을 기억해요</h2>
           <div class="why-list" style="margin-top:24px;">
@@ -1204,6 +1282,7 @@ Destroy한다, 또는 풀링한다면 ResourceManager.Return으로 돌려보낸�
             <div class="why-item"><span class="check">✓</span>충돌(Collision)은 물리적으로 밀어내고, 트리거(Trigger)는 겹침만 감지해요.</div>
             <div class="why-item"><span class="check">✓</span>오브젝트 풀링: 지우지 않고 SetActive(false)로 숨겨뒀다가, 다시 꺼내 써요.</div>
             <div class="why-item"><span class="check">✓</span>리소스 매니저: 여러 종류의 풀을, Dictionary + Queue로 한곳에서 관리해요.</div>
+            <div class="why-item"><span class="check">✓</span>FSM: 우리 게임의 오브젝트 상태는 어떻게 구분할까? 고민해보기도!</div>
           </div>
         </div>
       </div>
@@ -1246,7 +1325,7 @@ Destroy한다, 또는 풀링한다면 ResourceManager.Return으로 돌려보낸�
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script>
-  const TOTAL_PAGES = 26;
+  const TOTAL_PAGES = 28;
   const FOOTER_TAG = 'WEEK 06';
 
   document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
