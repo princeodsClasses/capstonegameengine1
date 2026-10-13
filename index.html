@@ -102,6 +102,17 @@
     box-shadow:var(--card-shadow-lg);
     border-color:var(--blue);
   }
+  .week-card.pending{
+    background:#eef1f3; cursor:default;
+  }
+  .week-card.pending:hover{
+    transform:none; box-shadow:var(--card-shadow); border-color:transparent;
+  }
+  .week-card.pending .week-num{
+    background:linear-gradient(180deg,#bcc5cc,#9aa7af); box-shadow:0 3px 0 #83909a;
+  }
+  .week-card.pending .week-title{ color:var(--ink-faint); }
+  .week-card.pending .week-arrow{ background:#e1e6e9; color:#9aa7af; }
   .week-num{
     font-family:'Baloo 2',sans-serif; font-weight:800; font-size:13px;
     color:var(--white); background:linear-gradient(180deg,var(--blue),var(--blue-dark));
@@ -132,6 +143,12 @@
   }
   .week-card.milestone .week-num{
     background:linear-gradient(180deg,var(--yellow),var(--yellow-dark)); box-shadow:0 3px 0 #b9820a; color:var(--ink);
+  }
+  .week-card.milestone.pending{
+    background:#eef1f3; border-color:transparent;
+  }
+  .week-card.milestone.pending .week-num{
+    background:linear-gradient(180deg,#bcc5cc,#9aa7af); box-shadow:0 3px 0 #83909a; color:var(--white);
   }
 
   footer{
@@ -246,7 +263,7 @@
     const num = String(n).padStart(2, '0');
     const href = `class${num}.html`;
     const a = document.createElement('a');
-    a.className = 'week-card' + (n === 15 ? ' milestone' : '');
+    a.className = 'week-card pending' + (n === 15 ? ' milestone' : '');
     a.href = '#';
     a.addEventListener('click', (e) => {
       if (a.dataset.ready !== 'true') { e.preventDefault(); showComingSoon(); }
@@ -263,6 +280,7 @@
       if (!info) return;
       a.href = href;
       a.dataset.ready = 'true';
+      a.classList.remove('pending');
       const sub = a.querySelector('.week-sub');
       if (sub) {
         if (info.topic) {
