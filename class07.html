@@ -1,0 +1,1151 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>7주차 · 상태, 코드가 되다 — Capstone Game Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root{
+    --sky-1: #bdeaff;
+    --sky-2: #eaf9ff;
+    --grass: #6bc55a;
+    --grass-dark: #4a9e3d;
+    --blue: #1f9be0;
+    --blue-dark: #0f7fc2;
+    --yellow: #ffce3d;
+    --yellow-dark: #f2a900;
+    --pink: #ff6fae;
+    --pink-dark: #d94c8a;
+    --green: #3ddc6a;
+    --green-dark: #1fb852;
+    --ink: #1b2b3a;
+    --ink-soft: #3a5266;
+    --ink-faint: rgba(27,43,58,.45);
+    --white: #ffffff;
+    --dash: rgba(27,43,58,.20);
+    --card-shadow: 0 4px 0 rgba(0,0,0,.08);
+    --card-shadow-lg: 0 8px 0 rgba(0,0,0,.10), 0 16px 28px #0000001a;
+  }
+  *{box-sizing:border-box;}
+  html, body{background:var(--sky-2); margin:0; padding:0;}
+  .reveal{font-family:'Nunito',sans-serif; color:var(--ink);}
+  .reveal .slides{text-align:left;}
+  .reveal .slides section{
+    background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 55%, #eafce0 100%);
+    height:100%; padding:0;
+  }
+  .reveal .slides section.plain-white{ background:#fff; }
+  .img-credit{ position:absolute; right:16px; bottom:12px; font-size:11px; color:var(--ink-faint); }
+  .display{font-family:'Baloo 2',sans-serif;}
+  .mono{font-family:'Nunito',sans-serif; font-weight:800;}
+
+  /* ---------- shared slide shell ---------- */
+  .slide-shell{
+    position:relative; height:100%; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:36px 56px;
+  }
+  .cloud{ position:absolute; background:#fff; border-radius:50%; opacity:.6;
+    animation: drift 2s ease-in-out infinite alternate; }
+  @keyframes drift{ from{transform:translateX(0);} to{transform:translateX(50px);} }
+
+  /* ---------- top / bottom bars ---------- */
+  .cs-header{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:32px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .brand-badge{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+    box-shadow:0 3px 0 var(--blue-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:16px; color:#fff;
+  }
+  .brand span{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:var(--ink);
+  }
+
+  .cs-footer{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .chip-tag{
+    background:rgba(255,255,255,.85); border-radius:999px; padding:8px 18px;
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; letter-spacing:.4px; color:var(--ink-soft);
+    box-shadow:var(--card-shadow);
+  }
+  .chip-tag b{color:var(--ink);}
+
+  /* ---------- headline system ---------- */
+  .section-title{
+    font-family:'Baloo 2',sans-serif !important;
+    font-size:34px !important; font-weight:700 !important;
+    color:var(--ink) !important; margin:0 !important;
+  }
+  .section-title .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%);
+    padding:0 4px;
+  }
+  .body-wrap{ position:relative; z-index:3; flex:1; min-height:0; display:flex; flex-direction:column; justify-content:flex-start; }
+
+  /* ---------- Title slide ---------- */
+  .title-stage{ padding:32px 48px; }
+  .pill-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px;
+    padding:8px 20px; border-radius:999px;
+    box-shadow:0 4px 0 var(--yellow-dark);
+    margin-bottom:24px;
+  }
+  .title-main{ display:flex; align-items:center; justify-content:center; height:100%; padding:0 8px; }
+  .title-copy{ max-width:760px; text-align:center; }
+  .headline-hero{
+    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:84px !important; line-height:1.05 !important;
+    color:var(--white) !important; margin:0 !important; letter-spacing:-1px;
+    -webkit-text-stroke:7px var(--ink); paint-order:stroke fill;
+    filter:drop-shadow(0 8px 0 rgba(0,0,0,.15));
+  }
+  .subline{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--ink-soft); margin-top:22px; }
+
+  /* ---------- Feature cards ---------- */
+  .obj-grid{ display:flex; flex-direction:column; gap:14px; margin-top:34px; }
+  .feature-card{ display:flex; gap:18px; align-items:flex-start; padding:20px 26px; border-radius:16px;
+    background:var(--white); box-shadow:var(--card-shadow); }
+  .feature-num{ font-family:'Baloo 2',sans-serif; font-size:18px; color:var(--blue-dark); font-weight:800; flex:0 0 auto; }
+  .feature-title{ font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+  .feature-desc{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Step cards ---------- */
+  .step-cards{ width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:36px; align-items:stretch; }
+  .step-card{
+    position:relative; background:var(--white);
+    border:3px solid var(--c); border-radius:22px 22px 70px 70px;
+    padding:52px 26px 32px; text-align:center; box-shadow:var(--card-shadow);
+  }
+  .step-icon{
+    position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+    width:56px; height:56px; border-radius:50%; background:var(--c);
+    box-shadow:0 4px 0 rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .step-label{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:13px; letter-spacing:1px; color:var(--c); margin-bottom:10px; }
+  .step-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:var(--ink); margin-bottom:12px; line-height:1.3; }
+  .step-desc{ font-size:13px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Teaser (질문 reveal) ---------- */
+  .teaser-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:22px; }
+  .teaser-icon{ position:relative; width:130px; height:130px; display:flex; align-items:center; justify-content:center; }
+  .teaser-icon .power-emoji{ position:relative; font-size:52px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15)); }
+  .teaser-question{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:44px; line-height:1.45;
+    letter-spacing:-.5px; color:var(--ink); max-width:800px;
+    text-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
+  .teaser-question.small{ font-size:34px; max-width:720px; }
+  .teaser-question .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 6px;
+  }
+  .teaser-caption{ font-size:12px; letter-spacing:1.5px; color:var(--ink-faint); }
+
+  /* ---------- Doc card (코드 예시) ---------- */
+  .doc-card{
+    background:var(--ink); border-radius:20px; padding:26px 34px;
+    box-shadow:var(--card-shadow-lg); flex:1;
+  }
+  .doc-card .doc-title{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:35px; color:#fff; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .doc-card .doc-title .tag{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; letter-spacing:.6px;
+    background:var(--yellow); color:var(--ink); padding:3px 10px; border-radius:8px;
+  }
+  .doc-section{ margin-bottom:12px; }
+  .doc-section .d-label{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--yellow);
+    border-left:3px solid var(--yellow); padding-left:8px; margin-bottom:4px;
+  }
+  .doc-section .d-line{ font-size:15px; color:#dfe8ee; line-height:1.55; padding-left:11px; }
+  .doc-section .d-line.placeholder{ color:rgba(223,232,238,.45); font-style:italic; }
+  .doc-card.doc-compact{ padding:22px 30px; }
+  .doc-card.doc-compact .doc-title{ font-size:26px; margin-bottom:14px; }
+  .doc-card.doc-compact .doc-section{ display:flex; align-items:baseline; gap:10px; margin-bottom:11px; }
+  .doc-card.doc-compact .doc-section .d-label{ font-size:16px; margin-bottom:0; flex:0 0 auto; }
+  .doc-card.doc-compact .doc-section .d-line{ font-size:14.5px; line-height:1.5; padding-left:0; }
+  .doc-code{
+    font-family:'Consolas','Menlo',monospace; font-size:13.5px; line-height:1.7; color:#d4d4d4;
+    background:#1e1e1e; border-radius:10px; padding:14px 18px; white-space:pre-wrap;
+    margin-left:11px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .code-kw{ color:#569cd6; }
+  .code-type{ color:#4ec9b0; }
+  .code-fn{ color:#dcdcaa; }
+  .code-str{ color:#ce9178; }
+  .code-cm{ color:#6a9955; }
+  .code-var{ color:#9cdcfe; }
+  .doc-columns{ display:flex; gap:24px; margin-top:18px; flex:1; }
+
+  /* ---------- Timeline-like list (오늘 정리) ---------- */
+  .why-list{ display:flex; flex-direction:column; gap:20px; margin-top:20px; }
+  .why-item{
+    display:flex; align-items:center; gap:14px; background:var(--white); border-radius:14px;
+    padding:22px 32px; box-shadow:var(--card-shadow); font-size:15px; color:var(--ink-soft); font-weight:600;
+  }
+  .why-item .check{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:var(--green);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
+    box-shadow:0 2px 0 var(--green-dark);
+  }
+
+  /* ---------- Closing ---------- */
+  .break-body{ position:relative; z-index:3; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .break-eyebrow{ font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--ink-faint); letter-spacing:1px; margin-bottom:22px; }
+  .break-hero{ font-family:'Baloo 2',sans-serif !important; font-size:46px !important; font-weight:800 !important; color:#000 !important; line-height:1.35 !important; max-width:840px; margin:0 !important; }
+  .break-hero .emph{ color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 4px; }
+  .break-sub{ font-size:16px; color:var(--ink-soft); margin-top:26px; max-width:760px; line-height:1.7; }
+  .break-sub .accent{ color:var(--blue-dark); font-weight:800; }
+
+  /* ---------- Home button ---------- */
+  .home-btn{
+    position:fixed; top:20px; left:24px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--white); color:var(--ink); text-decoration:none;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px;
+    padding:9px 16px; border-radius:999px; box-shadow:var(--card-shadow);
+  }
+  .home-btn:hover{ box-shadow:var(--card-shadow-lg); }
+
+  /* ---------- Cursor trail ---------- */
+  #cursorTrail{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999; }
+
+  /* ---------- Card hover invert ---------- */
+  .feature-card, .step-card, .why-item{
+    transition: background .22s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .feature-card:hover, .step-card:hover, .why-item:hover{
+    transform:translateY(-3px); box-shadow:var(--card-shadow-lg); cursor:default;
+  }
+  .feature-card:nth-child(4n+1):hover{ background:var(--blue-dark); }
+  .feature-card:nth-child(4n+2):hover{ background:var(--green-dark); }
+  .feature-card:nth-child(4n+3):hover{ background:var(--pink-dark); }
+  .feature-card:nth-child(4n+4):hover{ background:var(--yellow-dark); }
+  .feature-card:hover .feature-num, .feature-card:hover .feature-title, .feature-card:hover .feature-desc{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .step-card:hover{ background:var(--c); }
+  .step-card:hover .step-icon{ background:#fff; }
+  .step-card:hover .step-label, .step-card:hover .step-title, .step-card:hover .step-desc{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .why-item:hover{ background:var(--green-dark); color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+  .why-item:hover .check{ background:#fff; color:var(--green-dark); }
+
+  /* ---------- Entrance animations ---------- */
+  @keyframes fadeUp{ 0%{ opacity:0; transform:translateY(16px); } 100%{ opacity:1; transform:translateY(0); } }
+  @keyframes popIn{ 0%{ opacity:0; transform:scale(.82); } 100%{ opacity:1; transform:scale(1); } }
+
+  section.present .title-stage .pill-tag{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .title-stage .headline-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .title-stage .subline{ animation:fadeUp .6s ease-out .3s both; }
+
+  section.present .obj-grid .feature-card{ animation:fadeUp .55s ease-out both; }
+  section.present .obj-grid .feature-card:nth-child(1){ animation-delay:.1s; }
+  section.present .obj-grid .feature-card:nth-child(2){ animation-delay:.22s; }
+  section.present .obj-grid .feature-card:nth-child(3){ animation-delay:.34s; }
+  section.present .obj-grid .feature-card:nth-child(4){ animation-delay:.46s; }
+
+  section.present .step-cards .step-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .step-cards .step-card:nth-child(1){ animation-delay:.1s; }
+  section.present .step-cards .step-card:nth-child(2){ animation-delay:.28s; }
+  section.present .step-cards .step-card:nth-child(3){ animation-delay:.46s; }
+  section.present .step-cards .step-card:nth-child(4){ animation-delay:.64s; }
+
+  section.present .why-list .why-item{ animation:fadeUp .5s ease-out both; }
+  section.present .why-list .why-item:nth-child(1){ animation-delay:.05s; }
+  section.present .why-list .why-item:nth-child(2){ animation-delay:.15s; }
+  section.present .why-list .why-item:nth-child(3){ animation-delay:.25s; }
+  section.present .why-list .why-item:nth-child(4){ animation-delay:.35s; }
+  section.present .why-list .why-item:nth-child(5){ animation-delay:.45s; }
+
+  section.present .doc-columns .doc-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .doc-columns .doc-card:nth-child(1){ animation-delay:.1s; }
+  section.present .doc-columns .doc-card:nth-child(2){ animation-delay:.28s; }
+
+  section.present .teaser-wrap .teaser-icon{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .teaser-wrap .teaser-question{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .teaser-wrap .teaser-caption{ animation:fadeUp .5s ease-out .35s both; }
+
+  section.present .break-body .break-eyebrow{ animation:fadeUp .5s ease-out both; }
+  section.present .break-body .break-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .break-body .break-sub{ animation:fadeUp .6s ease-out .35s both; }
+
+  /* ---------- VS 카드 (호랑이 vs 사자) ---------- */
+  @keyframes vsSlideLeft{
+    0%{ opacity:0; transform:translateX(-420px); }
+    55%{ opacity:1; transform:translateX(0); }
+    100%{ opacity:1; transform:translateX(-30px); }
+  }
+  @keyframes vsSlideRight{
+    0%{ opacity:0; transform:translateX(420px); }
+    55%{ opacity:1; transform:translateX(0); }
+    100%{ opacity:1; transform:translateX(30px); }
+  }
+  .vs-card-tiger, .vs-card-lion, .vs-badge{ opacity:0; }
+  section.present .vs-card-tiger{ animation:vsSlideLeft 1.1s cubic-bezier(.25,.46,.45,.94) .1s both; }
+  section.present .vs-card-lion{ animation:vsSlideRight 1.1s cubic-bezier(.25,.46,.45,.94) .45s both; }
+  section.present .vs-badge{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1) 1.3s both; }
+
+  /* ---------- AI 역사 계단 (선이 먼저 그려지고, 그다음 노드가 팝인) ---------- */
+  @keyframes histDraw{ to{ stroke-dashoffset:0; } }
+  .hist-line{ stroke-dasharray:1; stroke-dashoffset:1; }
+  section.present .hist-line{ animation:histDraw .4s linear both; }
+  .hist-node{ opacity:0; }
+  section.present .hist-node{ animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
+  html.print-pdf .hist-line{ animation:none !important; stroke-dashoffset:0 !important; }
+  html.print-pdf .hist-node{ animation:none !important; opacity:1 !important; transform:none !important; }
+
+  /* ---------- GIF 팝업 (클릭 토글/순환) ---------- */
+  .gif-popup{
+    position:absolute; inset:0; z-index:20; display:none;
+    align-items:center; justify-content:center; background:rgba(0,0,0,.78); cursor:pointer;
+  }
+  .gif-popup.show{ display:flex; }
+  .gif-popup img{ max-width:85%; max-height:85%; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.4); }
+  .gif-popup .img-credit{ color:rgba(255,255,255,.7); }
+
+  /* ---------- Dictionary card (사전적 정의) ---------- */
+  .dict-card{
+    display:flex; flex-direction:column; width:100%; max-width:760px;
+    background:var(--white); border-radius:24px; padding:44px 52px;
+    box-shadow:var(--card-shadow-lg);
+  }
+  .dict-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:26px;
+    padding-bottom:18px; border-bottom:2px solid rgba(27,43,58,.1);
+  }
+  .dict-word{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:38px; color:var(--ink); }
+  .dict-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:16px; }
+  .dict-list li{ display:flex; gap:12px; align-items:baseline; font-size:16px; color:var(--ink); line-height:1.6; }
+  .dict-num{ flex:0 0 auto; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:14px; color:var(--ink-faint); }
+  .dict-pos{
+    flex:0 0 auto; font-family:'Nunito',sans-serif; font-weight:800; font-size:12px;
+    color:var(--blue-dark); background:rgba(31,155,224,.1); padding:2px 10px; border-radius:8px;
+  }
+  .dict-pos.verb{ color:var(--pink-dark); background:rgba(217,76,138,.1); }
+  .dict-sub{ color:var(--ink-faint); font-size:14px; }
+
+  /* ---------- Animator 창 목업 ---------- */
+  .anim-window{ background:#1e1e1e; border-radius:14px; padding:18px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06); flex:1; display:flex; gap:16px; }
+  .anim-params{ flex:0 0 190px; background:#252526; border-radius:10px; padding:14px; }
+  .anim-params .ap-title{ font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; letter-spacing:.8px; color:#9cdcfe; margin-bottom:10px; text-transform:uppercase; }
+  .anim-param{ display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.06); font-family:'Consolas','Menlo',monospace; font-size:12.5px; color:#dcdcdc; }
+  .anim-param .ap-dot{ width:9px; height:9px; border-radius:2px; background:#ce9178; flex:0 0 auto; }
+  .anim-graph{ flex:1; position:relative; }
+
+  html.print-pdf .pill-tag, html.print-pdf .headline-hero, html.print-pdf .subline,
+  html.print-pdf .feature-card, html.print-pdf .step-card,
+  html.print-pdf .why-item, html.print-pdf .doc-card,
+  html.print-pdf .teaser-icon, html.print-pdf .teaser-question, html.print-pdf .teaser-caption,
+  html.print-pdf .break-eyebrow, html.print-pdf .break-hero, html.print-pdf .break-sub,
+  html.print-pdf .vs-card-tiger, html.print-pdf .vs-card-lion, html.print-pdf .vs-badge{
+    animation:none !important; opacity:1 !important; transform:none !important; clip-path:none !important;
+  }
+
+  @media screen and (max-width:900px){
+    .headline-hero{ font-size:52px !important; -webkit-text-stroke:5px var(--ink); }
+    .section-title{ font-size:24px !important; }
+    .step-cards{ grid-template-columns:1fr; }
+    .doc-columns{ flex-direction:column; }
+  }
+
+  @page{ size: landscape; margin:0; }
+  html.print-pdf .reveal .slides section,
+  html.print-pdf .slide-shell{ width:1280px !important; height:720px !important; }
+
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="index.html">← Course Home</a>
+
+<canvas id="cursorTrail"></canvas>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ Title ============ -->
+    <section>
+      <div class="slide-shell title-stage">
+        <div class="cloud" style="width:100px;height:58px; top:40px; left:6%; animation-duration:14s;"></div>
+        <div class="cloud" style="width:130px;height:72px; top:80px; left:55%; animation-duration:18s; animation-delay:-5s;"></div>
+
+        <div class="title-main">
+          <div class="title-copy">
+            <div class="pill-tag">🎮 DIGITAL CONTENTS DESIGN</div>
+            <h1 class="headline-hero">Artificial Intelligence</h1>
+            <div class="subline">Capstone Game Engine · 7주차</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘의 흐름 ============ -->
+    <section>
+      <div class="slide-shell" data-page="01">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘은 <span class="emph">이렇게</span> 진행할게요</h2>
+          <div style="flex:1; display:flex; align-items:center;">
+            <div class="step-cards" style="grid-template-columns:repeat(4,1fr); gap:20px;">
+              <div class="step-card" style="--c:var(--pink-dark);">
+                <div class="step-icon">🥊</div>
+                <div class="step-label">PART 1 · 토론</div>
+                <div class="step-title">호랑이 vs. 사자</div>
+                <div class="step-desc">누가 이길까요?</div>
+              </div>
+              <div class="step-card" style="--c:var(--grass-dark);">
+                <div class="step-icon">🧭</div>
+                <div class="step-label">PART 2 · 기획</div>
+                <div class="step-title">AI 는 뭘까요?</div>
+                <div class="step-desc">같이 알아봐요.</div>
+              </div>
+              <div class="step-card" style="--c:var(--yellow-dark);">
+                <div class="step-icon">🎛️</div>
+                <div class="step-label">PART 3 · 엔진</div>
+                <div class="step-title">Mecanim이란?</div>
+                <div class="step-desc">상태를 다루는,<br>유니티의 방법.</div>
+              </div>
+              <div class="step-card" style="--c:var(--blue-dark);">
+                <div class="step-icon">⚙️</div>
+                <div class="step-label">PART 4 · 엔진</div>
+                <div class="step-title">StateMachineBehaviour</div>
+                <div class="step-desc">수도 코드를,<br>진짜 코드로.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 1 전환 (토론) ============ -->
+    <section>
+      <div class="slide-shell" data-page="02">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 1 · 토론</div>
+          <h2 class="break-hero">지난 주 예고했던, <br>그 <span class="emph">대결</span>부터 시작해볼까요?</h2>
+          <div class="break-sub">호랑이와 사자. 이번에도 정답은 없어요. <span class="accent">자유롭게</span> 이야기 나눠봅시다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 토론 주제 (호랑이 vs 사자) ============ -->
+     
+    <section>
+      <div class="slide-shell" data-page="03">
+        <div class="teaser-wrap" style="gap:24px;">
+          <div style="display:flex; gap:20px; justify-content:center; align-items:center; flex-wrap:wrap;">
+            <div class="vs-card-tiger" style="flex:0 0 320px; background:var(--white); border-radius:20px; padding:28px 26px; box-shadow:var(--card-shadow-lg); text-align:center; border-top:8px solid var(--yellow-dark);">
+              <div style="font-size:170px; margin-bottom:6px;">🐅</div>
+              <div style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:20px; color:var(--yellow-dark); margin-bottom:8px;">호랑이</div>
+            </div>
+            <div class="vs-badge" style="flex:0 0 auto; width:72px; height:72px; border-radius:50%; background:var(--yellow); display:flex; align-items:center; justify-content:center; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:24px; color:var(--ink); box-shadow:0 5px 0 var(--yellow-dark); z-index:2;">VS</div>
+            <div class="vs-card-lion" style="flex:0 0 320px; background:var(--white); border-radius:20px; padding:28px 26px; box-shadow:var(--card-shadow-lg); text-align:center; border-top:8px solid var(--pink-dark);">
+              <div style="font-size:150px; margin-bottom:6px;">🦁</div>
+              <div style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:20px; color:var(--pink-dark); margin-bottom:8px;">사자</div>
+            </div>
+          </div>
+          <div class="teaser-question small" style="margin-top:4px;">당신의 <span class="emph">선택</span>은, 누가 이길까요?</div>
+          <div class="teaser-caption mono">TODAY'S TALK · ICE BREAKING</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 연결 브릿지 (상태였다) ============ -->
+    <section>
+      <div class="slide-shell" data-page="04">
+        <div class="break-body">
+          <div class="break-eyebrow">어때요?</div>
+          <h2 class="break-hero"><span class="emph">AI</span> 가 동작하는 것 잘 봤어요?</h2>
+          <div class="break-sub">그럼 이제 <span class="accent">AI</span>( artificial intelligence ) 에 대해 잠깐 살펴볼까요?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="05">
+        <div class="body-wrap" style="align-items:center; justify-content:center;">
+          <!--h2 class="section-title" style="align-self:flex-start;"><span class="emph">AI</span>란?</h2-->
+          <div class="dict-card" style="margin-top:28px;">
+            <div class="dict-head">
+              <span class="dict-word">AI</span>
+            </div>
+            <ol class="dict-list">
+              <li><span class="dict-num">1.</span><span class="dict-pos">명사</span><span>Artificial Intelligence(인공지능)의 약자.</span></li>
+              <li><span class="dict-num">2.</span><span class="dict-pos">명사</span><span>인간의 지적 능력을 모방하여 만들어진, 모종의 것.</span></li>
+              <li><span class="dict-num">3.</span><span class="dict-pos verb">IT</span><span>인간의 지능이 가지는 학습, 추리, 적응, 논증 따위의 기능을 갖춘 컴퓨터 시스템. 전문가 시스템, 자연 언어의 이해, 음성 번역, 로봇 공학, 인공 시각, 문제 해결, 학습과 지식 획득, 인지 과학 따위에 응용한다.</span></li>
+            </ol>
+          </div>
+        </div>
+        <div class="gif-popup gif-cycle" data-images="Midias/w7/4-1.gif,Midias/w7/4-2.gif,Midias/w7/4-3.gif">
+          <img src="" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI의 역사 ============ -->
+    <section>
+      <div class="slide-shell" data-page="06">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">AI</span>는 이렇게 발전해왔어요.</h2>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:4px; min-height:0;">
+            <svg viewBox="0 0 920 440" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; max-height:440px;">
+              <g font-family="'Nunito', sans-serif">
+                <!-- 선을 전부 먼저 그려서(= DOM에서 노드보다 앞에 둬서), 어떤 노드 위도 안 덮게 해요. -->
+                <path class="hist-line" pathLength="1" style="animation-delay:.5s;" d="M50,390 L50,320 L210,320" fill="none" stroke="#4a9e3d" stroke-width="5" stroke-linecap="round"/>
+                <path class="hist-line" pathLength="1" style="animation-delay:1.1s;" d="M210,320 L210,250 L370,250" fill="none" stroke="#f2a900" stroke-width="5" stroke-linecap="round"/>
+                <path class="hist-line" pathLength="1" style="animation-delay:1.7s;" d="M370,250 L370,180 L530,180" fill="none" stroke="#d94c8a" stroke-width="5" stroke-linecap="round"/>
+                <path class="hist-line" pathLength="1" style="animation-delay:2.3s;" d="M530,180 L530,110 L690,110" fill="none" stroke="#3a5266" stroke-width="5" stroke-linecap="round"/>
+                <path class="hist-line" pathLength="1" style="animation-delay:2.9s;" d="M690,110 L690,50 L850,50" fill="none" stroke="#0f7fc2" stroke-width="5" stroke-linecap="round"/>
+
+                <!-- 1단계: 40~60's (들어오는 계단선 없음) -->
+                <g class="hist-node" style="animation-delay:.1s;">
+                  <circle cx="50" cy="390" r="34" fill="#1f9be0"/>
+                  <text x="50" y="395" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">40~60`s</text>
+                  <text x="98" y="378" font-size="13" font-weight="800" fill="#1b2b3a">Rule Base System · Path Find</text>
+                  <text x="98" y="396" font-size="11.5" fill="rgba(27,43,58,.6)">모방의 시작 — 탐색, A* 알고리즘</text>
+                </g>
+
+                <!-- 2단계: 70~80's -->
+                <g class="hist-node" style="animation-delay:.8s;">
+                  <circle cx="210" cy="320" r="34" fill="#4a9e3d"/>
+                  <text x="210" y="325" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">70~80`s</text>
+                  <text x="258" y="308" font-size="13" font-weight="800" fill="#1b2b3a">MYCIN · DENDRAL ( Expert System )</text>
+                  <text x="258" y="326" font-size="11.5" fill="rgba(27,43,58,.6)">DB + if~else로, 전문가의 판단을 흉내내요</text>
+                </g>
+
+                <!-- 3단계: 80~90's -->
+                <g class="hist-node" style="animation-delay:1.4s;">
+                  <circle cx="370" cy="250" r="34" fill="#f2a900"/>
+                  <text x="370" y="255" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">80~90`s</text>
+                  <text x="418" y="238" font-size="13" font-weight="800" fill="#a06d00">FSM · Fuzzy · Swarm · Multi Agent</text>
+                  <text x="418" y="256" font-size="11.5" fill="rgba(27,43,58,.6)">본격적으로 다양한 기법이 갈라지기 시작해요</text>
+                </g>
+
+                <!-- 4단계: 2000's -->
+                <g class="hist-node" style="animation-delay:2.0s;">
+                  <circle cx="530" cy="180" r="34" fill="#d94c8a"/>
+                  <text x="530" y="185" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">2000`s</text>
+                  <text x="578" y="168" font-size="13" font-weight="800" fill="#1b2b3a">Machine Learning · SVM · Random Forest</text>
+                  <text x="578" y="186" font-size="11.5" fill="rgba(27,43,58,.6)">AI 르네상스 — 데이터로 학습시키기 시작</text>
+                </g>
+
+                <!-- 5단계: 2010's -->
+                <g class="hist-node" style="animation-delay:2.6s;">
+                  <circle cx="690" cy="110" r="34" fill="#3a5266"/>
+                  <text x="690" y="115" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">2010`s</text>
+                  <text x="738" y="98" font-size="13" font-weight="800" fill="#1b2b3a">Deep Learning · Big Data</text>
+                  <text x="738" y="116" font-size="11.5" fill="rgba(27,43,58,.6)">대량의 데이터 + 신경망</text>
+                </g>
+
+                <!-- 6단계: 2020's · 지금 여기 -->
+                <g class="hist-node" style="animation-delay:3.2s;">
+                  <circle cx="850" cy="50" r="34" fill="#0f7fc2"/>
+                  <text x="850" y="55" font-weight="800" font-size="14" fill="#fff" text-anchor="middle">2020`s</text>
+                  <text x="880" y="10" font-size="13" font-weight="800" fill="#1b2b3a" text-anchor="end">지금, 여기!!</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:6px; text-align:center;">오늘 우리가 쓴 FSM은, <b>80~90년대</b>에 자리 잡은 방식이에요 — 30년 넘게 지난 지금도, 여전히 제일 많이 쓰이는 방법 중 하나예요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI 기법 지도 ============ -->
+    <section>
+      <div class="slide-shell" data-page="07">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">AI</span>의 종류는 여러 가지가 있어요.</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">FSM (Finite State Machine)</div>
+              <div class="feature-desc">오늘 우리가 다루는 것. 상태 + 전이로 직관적이에요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">Behavior Tree</div>
+              <div class="feature-desc">상태 대신 "조건"으로 분기되는 "행동"을 트리 구조로 쌓아요. 재사용 · 조합이 쉬워요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Utility AI</div>
+              <div class="feature-desc">가능한 행동마다 점수(utility)를 매겨서, 매 순간 제일 높은 걸 선택해요. 더 유연하지만, 점수 설계가 까다로워요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">GOAP (Goal-Oriented Action Planning)</div>
+              <div class="feature-desc">"목표"만 정해주면, 그걸 이루는 행동 순서를 AI가 스스로 계획해요. F.E.A.R. 같은 게임에서 썼어요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">이 넷은 전부, "무엇을 할지" <b>행동을 결정</b>하는 쪽이에요. FSM은 상태가 늘어날수록 전이가 기하급수적으로 늘어나서, 수십 개가 되면 Behavior Tree 같은 다른 방식을 더 많이 써요.</div>
+        </div>
+        <div class="gif-popup gif-toggle" data-images="Midias/w7/7-1.gif,Midias/w7/7-2.gif,Midias/w7/7-3.gif,Midias/w7/7-4.gif">
+          <img src="" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI 기법 지도 (움직임 · 학습) ============ -->
+    <section>
+      <div class="slide-shell" data-page="08">
+        <div class="body-wrap">
+          <h2 class="section-title">그리고, <span class="emph">결이 다른</span> AI 기법들도 있어요</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">Path Finding (길찾기)</div>
+              <div class="feature-desc">A* 같은 알고리즘으로, 목적지까지 가장 효율적인 경로를 찾아요. 오늘 Chase/Flee의 "직선으로 이동"보다 한 단계 더 똑똑한 이동이에요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">Flocking (무리 행동)</div>
+              <div class="feature-desc">주변 개체와 거리 · 방향을 맞추면서, 자연스럽게 무리지어 움직여요. 새 떼 · 물고기 떼 같은 군집 연출에 써요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Machine Learning</div>
+              <div class="feature-desc">규칙을 직접 안 짜고, 데이터를 학습시켜서 행동을 만들어요. 유니티는 ML-Agents라는 패키지로 지원해요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">이 셋은 "무엇을 할지"가 아니라, <b>어떻게 움직일지 · 어떻게 배울지</b> 쪽이에요. 실제로는 같이 조합해서 써요 — 예를 들어, FSM으로 상태를 정하고 Path Finding으로 실제 이동 경로를 찾는 식으로요.</div>
+        </div>
+        <div class="gif-popup gif-toggle" data-images="Midias/w7/8-1.gif,Midias/w7/8-2.gif,Midias/w7/8-3.gif">
+          <img src="" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 2 전환 (기획 · 복습) ============ -->
+    <section>
+      <div class="slide-shell" data-page="09">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 2 · 기획</div>
+          <h2 class="break-hero">지난 주 우리,<br>이미 <span class="emph">상태</span>를 그려봤어요.</h2>
+          <div class="break-sub">Enemy ( NPC ) 다이어그램 기억나요?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Enemy 상태 다이어그램 복습 ============ -->
+    <section>
+      <div class="slide-shell" data-page="10">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">Enemy, <span class="emph">상태 다이어그램</span> 복습해보면</h2>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:4px;">
+            <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width:auto; height:100%; max-height:560px;">
+              <defs>
+                <marker id="fsmArrowE1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#3a5266"/>
+                </marker>
+                <marker id="fsmArrowBackE1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="rgba(27,43,58,.45)"/>
+                </marker>
+              </defs>
+              <g font-family="'Baloo 2', sans-serif" font-weight="700" font-size="19" text-anchor="middle">
+                <rect x="30" y="30" width="220" height="80" rx="16" fill="#eaf6ff" stroke="#0f7fc2" stroke-width="2.5"/>
+                <text x="140" y="76" fill="#0f7fc2">Idle</text>
+                <rect x="450" y="30" width="220" height="80" rx="16" fill="#fff7e0" stroke="#f2a900" stroke-width="2.5"/>
+                <text x="560" y="76" fill="#a06d00">Alert</text>
+                <rect x="30" y="350" width="220" height="80" rx="16" fill="#f0f0f0" stroke="#3a5266" stroke-width="2.5"/>
+                <text x="140" y="396" fill="#3a5266">Dead</text>
+                <rect x="450" y="350" width="220" height="80" rx="16" fill="#ffe3ef" stroke="#d94c8a" stroke-width="2.5"/>
+                <text x="560" y="396" fill="#d94c8a">Attack</text>
+              </g>
+              <line x1="256" y1="58" x2="444" y2="58" stroke="#3a5266" stroke-width="2.5" marker-end="url(#fsmArrowE1)"/>
+              <text x="350" y="46" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="12.5" fill="#3a5266">시야 범위 진입</text>
+              <line x1="444" y1="86" x2="256" y2="86" stroke="rgba(27,43,58,.45)" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#fsmArrowBackE1)"/>
+              <text x="350" y="106" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="12.5" fill="rgba(27,43,58,.55)">시야에서 놓침 (일정 시간)</text>
+              <line x1="530" y1="116" x2="530" y2="344" stroke="#3a5266" stroke-width="2.5" marker-end="url(#fsmArrowE1)"/>
+              <text x="515" y="225" text-anchor="end" font-family="'Nunito', sans-serif" font-weight="700" font-size="12.5" fill="#3a5266">사거리 진입<tspan x="515" dy="15">+ 쿨타임 끝</tspan></text>
+              <line x1="590" y1="344" x2="590" y2="116" stroke="rgba(27,43,58,.45)" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#fsmArrowBackE1)"/>
+              <text x="605" y="225" text-anchor="start" font-family="'Nunito', sans-serif" font-weight="700" font-size="12.5" fill="rgba(27,43,58,.55)">사거리<tspan x="605" dy="15">벗어남</tspan></text>
+              <line x1="444" y1="390" x2="256" y2="390" stroke="#3a5266" stroke-width="2.5" marker-end="url(#fsmArrowE1)"/>
+              <text x="350" y="378" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="13" fill="#3a5266">HP ≤ 0</text>
+              <line x1="140" y1="116" x2="140" y2="344" stroke="rgba(27,43,58,.4)" stroke-width="2" stroke-dasharray="3 6" marker-end="url(#fsmArrowE1)"/>
+              <text x="100" y="230" text-anchor="end" font-family="'Nunito', sans-serif" font-weight="700" font-size="12" fill="rgba(27,43,58,.55)">HP ≤ 0<tspan x="100" dy="15">(여기서도)</tspan></text>
+              <path d="M670,375 C708,385 708,405 670,415" fill="none" stroke="#d94c8a" stroke-width="2" marker-end="url(#fsmArrowE1)"/>
+              <text x="716" y="400" text-anchor="start" font-family="'Nunito', sans-serif" font-weight="700" font-size="11.5" fill="#d94c8a">쿨타임마다<tspan x="716" dy="14">반복 공격</tspan></text>
+            </svg>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:13px; color:var(--ink-faint); margin-top:6px;">오늘은, 이 네모와 화살표를 <b>그대로</b> Mecanim의 Animator Controller로 옮길 거예요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 상태 패턴이란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="11">
+        <div class="body-wrap">
+          <h2 class="section-title">다시! <span class="emph">상태 패턴</span> (State Pattern) 이란?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">정의</div>
+              <div class="feature-desc">상태마다 클래스를 하나씩 만들고, 공통 인터페이스(EnterState · UpdateState · ExitState)로 다뤄요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">전이</div>
+              <div class="feature-desc">상태 클래스 안에서, 조건에 따라 캐릭터가 들고 있는 "현재 상태"를 다른 상태 객체로 바꿔치기해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Why 상태 패턴?</div>
+              <div class="feature-desc">구현이 쉽고, 코드가 유연하고 명확해요. 상태 하나 고치는 게, 그 클래스 하나만 고치면 끝이에요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">그런데</div>
+              <div class="feature-desc">전이 조건을 전부 if/else로 직접 짜야 하고, 상태가 몇 개고 어떻게 연결돼 있는지 한눈에 안 보여요.<br>그래서! <b>메카님</b>을 사용할거에요!</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Mecanim이란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="12">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">Mecanim</span>이란 무엇일까요?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">Animator Controller</div>
+              <div class="feature-desc">상태들을 그래프로 연결해둔, 상태 머신 그 자체예요. Animator 창에서 보는 그 그래프예요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">State</div>
+              <div class="feature-desc">네모 상자 하나가, 상태 하나. 애니메이션 클립을 넣어도 되고, <b>로직만 있는 빈 상태</b>도 괜찮아요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Transition + Parameter</div>
+              <div class="feature-desc">화살표 하나가, 전이 하나. <b>Parameter</b>(대부분 Trigger)로, 언제 넘어갈지 조건을 걸어요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">Any State</div>
+              <div class="feature-desc">어떤 상태에 있든 상관없이 갈 수 있는, 공통 전이용 특수 노드예요. Dead로 갈 때 딱이에요.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Animator Controller 설정 ============ -->
+    <section>
+      <div class="slide-shell" data-page="13">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">Animator Controller</span> 창을 보면,</h2>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:4px; min-height:0;">
+            <img src="Midias/w7/12-1.png" alt="" style="max-width:100%; max-height:100%; border-radius:16px; box-shadow:var(--card-shadow-lg);">
+          </div>
+          <div class="intro-note" style="font-size:18px; color:var(--ink-faint); margin-top:10px; text-align:center;"><b>한 눈에 들어오죠?</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 연결 브릿지 (수도 코딩) ============ -->
+    <section>
+      <div class="slide-shell" data-page="14">
+        <div class="break-body">
+          <div class="break-eyebrow">그러면 상태들을 만들어볼까요?</div>
+          <h2 class="break-hero">각 상태는 <span class="emph">독립적</span>이고 <span class="emph">고유</span>한 역할을 하도록!</h2>
+          <div class="break-sub">설계 단계에선 다이어그램으로 그려보면 <span class="accent">쉽게 파악</span>할 수 있어요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 대기 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="15">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">대기</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#0f7fc2;">Idle <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">정지한다
+대기시간을 랜덤(1~3초)으로 정한다
+다음에 갈 패트롤 지점을, 랜덤으로 하나 뽑는다</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">만약 대상이 감지 범위 안이면:
+    경계로 전이
+
+대기시간이 다 되면:
+    패트롤로 전이</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 패트롤 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="16">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">패트롤</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#4a9e3d;">Patrol <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">랜덤으로 뽑힌 지점 방향으로, 이동을 시작한다 (moveSpeedNormal)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">만약 대상이 감지 범위 안이면:
+    경계로 전이
+
+만약 목표 지점에 도착했으면:
+    대기로 전이</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음)</div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:8px;">웨이포인트가 아니라, 시작 위치 반경 안에서 매번 랜덤으로 지점을 뽑아요 — 그래서 "다음 웨이포인트"가 아니라 "랜덤 지점"이에요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 경계 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="17">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">경계</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#a06d00;">Alert <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">정지한다
+suspicion(의심치) = 최대치의 절반으로 시작</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상 쪽으로 회전한다
+
+만약 대상이 보이면: suspicion 증가
+아니면: suspicion 감소
+
+만약 suspicion이 가득 찼으면 (적 확정):
+    전투 추적으로 전이
+만약 suspicion이 0이 되면 (의심 해제):
+    대기로 전이</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 전투 추적 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="18">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">전투 추적</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#4ec9b0;">CombatChase <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상 쪽으로, 이동을 시작한다 (moveSpeedCombat)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상 쪽으로 계속 이동하며, 대상 쪽으로 회전한다
+
+만약 사거리 안이면:
+    발사로 전이</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 발사 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="19">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">발사</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#d94c8a;">Fire <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상을 계속 바라보며, 스트레이프(좌우 이동) 방향을 랜덤으로 정한다
+쿨다운 = 0 (들어오자마자 한 발)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.55;">대상을 계속 바라보며, 좌우 스트레이프 이동한다 (moveSpeedCombat)
+스트레이프 방향은, 1~2.5초마다 랜덤하게 다시 정한다
+
+쿨다운이 끝나면:
+    발사한다 (bulletAngle 범위 안에서 방향 랜덤하게 퍼짐)
+    쿨다운 다시 채운다
+
+만약 거리 &gt; 사거리:
+    전투 추적으로 전이
+만약 체력 ≤ 최대체력 × fleeHpRatio:
+    전투 도주로 전이</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">스트레이프 이동을 멈춘다 (조준 해제)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 전투 도주 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="20">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">전투 도주</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#f2a900;">CombatFlee <span class="tag">StateMachineBehaviour</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상 반대 방향으로, 이동을 시작한다 (moveSpeedCombat)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate <span style="font-size:13px; color:#dfe8ee; font-weight:600;">— 매 프레임</span></div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">대상 반대 방향으로, 계속 이동한다
+
+만약 거리 ≥ 안전거리:
+    경계로 전이 (일단 돌아가서, 다시 지켜본다)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">이동을 멈춘다 (도주 속도 원복)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 사망 수도 코드 ============ -->
+    <section>
+      <div class="slide-shell" data-page="21">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">사망</span>, 수도 코드로 보면</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px; color:#cfd6db;">Dead <span class="tag">StateMachineBehaviour · Any State</span></div>
+            <div class="doc-section">
+              <div class="d-label">OnEnter</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">정지한다
+콜라이더를 끈다 (더 이상 총알에 맞지 않는다)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnUpdate</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음)</div>
+            </div>
+            <div class="doc-section">
+              <div class="d-label">OnExit</div>
+              <div class="doc-code" style="font-size:13px; line-height:1.6;">(없음 — 끝 상태. 리셋은 UI에서 따로 처리한다)</div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:8px;">6개 상태 중 어디에 있든 상관없이, 체력 ≤ 0이면 Any State 전이로 바로 여기로 와요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 쉬는시간 ============ -->
+    <section class="plain-white">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
+        <img src="Midias/letswrapituphere.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
+      </div>
+    </section>
+
+    <!-- ============ PART 4 전환 (구현) ============ -->
+    <section>
+      <div class="slide-shell" data-page="22">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 4 · 엔진</div>
+          <h2 class="break-hero">수도 코드를 <span class="emph">엔진</span>으로 옮겨볼까요?</h2>
+          <div class="break-sub">엔진 열고. 가볼까요?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘 정리 ============ -->
+    <section>
+      <div class="slide-shell" data-page="23">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘, <span class="emph">이 것들</span>을 기억해요</h2>
+          <div class="why-list" style="margin-top:24px;">
+            <div class="why-item"><span class="check">✓</span>FSM의 상태(State) · 전이(Transition)는, Mecanim의 Animator Controller로 그대로 옮길 수 있어요.</div>
+            <div class="why-item"><span class="check">✓</span>StateMachineBehaviour: OnStateEnter · OnStateUpdate · OnStateExit — 상태 하나하나에 직접 붙는 스크립트예요.</div>
+            <div class="why-item"><span class="check">✓</span>같은 Animator Controller를 써도, Animator(오브젝트)마다 변수는 따로 생성돼서 안 섞여요.</div>
+            <div class="why-item"><span class="check">✓</span>HP ≤ 0 같은 공통 조건은, Any State 전이로 어떤 상태에 있든 한 곳(Dead)으로 모을 수 있어요.</div>
+            <div class="why-item"><span class="check">✓</span>발사처럼 반복되는 행동은, 상태를 안 떠나고 OnStateUpdate 안에서 반복해도 괜찮아요.</div>
+            <div class="why-item"><span class="check">✓</span>모든 걸 FSM으로 만들 필요는 없어요 — 총알처럼 상태가 사실상 하나면, 그냥 MonoBehaviour로 충분해요.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Let's call it a day ============ -->
+    <section class="plain-white">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
+        <img src="Midias/letscallitaday.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
+      </div>
+    </section>
+
+    <!-- ============ (이스터에그) 다음 주제 ============ -->
+    <section>
+      <div class="slide-shell">
+        <div class="body-wrap">
+          <h2 class="section-title">다음 주는, 이 <span class="emph">질문</span>으로 시작합니다.</h2>
+          <div class="teaser-wrap" style="gap:24px;">
+            <div class="teaser-icon" style="width:auto; height:auto;">
+              <span class="power-emoji" style="font-size:150px;">⚖️</span>
+            </div>
+            <div class="teaser-question small">납득할 수 없는 <span class="emph">법</span>은 어떤 게 있어요?<br>그러면 어떻게 해야 하죠?</div>
+            <div class="teaser-caption mono">NEXT WEEK · ICE BREAKING</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+  const TOTAL_PAGES = 23;
+  const FOOTER_TAG = 'WEEK 07';
+
+  document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
+    const page = el.getAttribute('data-page');
+    const header = document.createElement('div');
+    header.className = 'cs-header';
+    header.innerHTML = `<div class="brand"><div class="brand-badge">G</div><span>Capstone Game Engine</span></div>`;
+    const footer = document.createElement('div');
+    footer.className = 'cs-footer';
+    footer.innerHTML = `<div class="chip-tag">${FOOTER_TAG}</div><div class="chip-tag">${page} / ${TOTAL_PAGES}</div>`;
+    el.prepend(header);
+    el.append(footer);
+  });
+
+  // ---------- GIF 순환 팝업 (클릭할 때마다 숨김→1→2→숨김→1...) ----------
+  document.querySelectorAll('.gif-cycle').forEach(popup => {
+    const slide = popup.closest('.slide-shell');
+    const img = popup.querySelector('img');
+    const srcs = popup.dataset.images.split(',');
+    const total = srcs.length + 1; // 이미지들 + 숨김, 한 바퀴
+    let step = -1;
+
+    slide.addEventListener('click', () => {
+      step = (step + 1) % total;
+      if (step === srcs.length) {
+        popup.classList.remove('show');
+      } else {
+        img.src = srcs[step];
+        popup.classList.add('show');
+      }
+    });
+  });
+
+  // ---------- GIF 토글 팝업 (클릭할 때마다 1→숨김→2→숨김→3→숨김→4→숨김→1...) ----------
+  document.querySelectorAll('.gif-toggle').forEach(popup => {
+    const slide = popup.closest('.slide-shell');
+    const img = popup.querySelector('img');
+    const srcs = popup.dataset.images.split(',');
+    let idx = 0;
+
+    slide.addEventListener('click', () => {
+      if (popup.classList.contains('show')) {
+        popup.classList.remove('show');
+        idx = (idx + 1) % srcs.length;
+      } else {
+        img.src = srcs[idx];
+        popup.classList.add('show');
+      }
+    });
+  });
+
+  Reveal.initialize({
+    hash: true, controls: true, progress: true, center: false,
+    transition: 'fade', width: 1280, height: 720, margin: 0,
+  });
+
+  let wheelLocked = false;
+  document.addEventListener('wheel', (e) => {
+    if (wheelLocked || Math.abs(e.deltaY) < 1) return;
+    wheelLocked = true;
+    try { if (e.deltaY > 0) { Reveal.next(); } else { Reveal.prev(); } }
+    catch (err) { console.warn('Reveal not ready yet:', err); }
+    setTimeout(() => { wheelLocked = false; }, 600);
+  }, { passive: true });
+
+  // ---------- Cursor trail ----------
+  (() => {
+    const canvas = document.getElementById('cursorTrail');
+    const ctx = canvas.getContext('2d');
+    const rootStyle = getComputedStyle(document.documentElement);
+    const palette = ['--blue', '--green', '--pink', '--yellow-dark'].map(
+      v => rootStyle.getPropertyValue(v).trim()
+    );
+    let colorIndex = 0;
+    let particles = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    document.addEventListener('mousemove', (e) => {
+      particles.push({
+        x: e.clientX, y: e.clientY,
+        r: 9, alpha: 1,
+        color: palette[colorIndex++ % palette.length],
+      });
+      if (particles.length > 40) particles.shift();
+    });
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.r *= 0.92;
+        p.alpha *= 0.9;
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      particles = particles.filter(p => p.alpha > 0.03 && p.r > 0.5);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
+</script>
+</body>
+</html>
