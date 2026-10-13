@@ -220,7 +220,7 @@
 
 <script>
   // class02.html, class03.html ... 처럼 실제 파일이 존재하는 주차만 자동으로 카드가 열립니다.
-  // (index.html 기준 상대경로로 HEAD 요청을 보내 200/404 여부로 판단 - GitHub Pages 등 http(s) 서빙 환경에서만 동작)
+  // (index.html 기준 상대경로로 GET 요청을 보내 200/404 여부 및 <title> 주제를 파싱 - GitHub Pages 등 http(s) 서빙 환경에서만 동작)
   const weeks = Array.from({length: 14}, (_, i) => i + 2);
   const grid = document.getElementById('weekGrid');
   const popupOverlay = document.getElementById('popupOverlay');
@@ -230,12 +230,15 @@
   document.getElementById('popupClose').addEventListener('click', hideComingSoon);
   popupOverlay.addEventListener('click', (e) => { if (e.target === popupOverlay) hideComingSoon(); });
 
-  const checkExists = async (url) => {
+  const fetchWeekInfo = async (url) => {
     try {
-      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-      return res.ok;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const html = await res.text();
+      const titleMatch = html.match(/<title>\s*\d+주차\s*·\s*(.*?)\s*—/);
+      return { topic: titleMatch ? titleMatch[1].trim() : null };
     } catch (e) {
-      return false;
+      return null;
     }
   };
 
@@ -256,12 +259,18 @@
     `;
     grid.appendChild(a);
 
-    checkExists(href).then(ready => {
-      if (!ready) return;
+    fetchWeekInfo(href).then(info => {
+      if (!info) return;
       a.href = href;
       a.dataset.ready = 'true';
       const sub = a.querySelector('.week-sub');
-      if (sub) sub.remove();
+      if (sub) {
+        if (info.topic) {
+          sub.textContent = info.topic;
+        } else {
+          sub.remove();
+        }
+      }
     });
   });
 </script>
