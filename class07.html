@@ -319,6 +319,7 @@
   .gif-popup.show{ display:flex; }
   .gif-popup img{ max-width:85%; max-height:85%; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.4); }
   .gif-popup .img-credit{ color:rgba(255,255,255,.7); }
+  .slide-shell:has(.gif-toggle-cards) .feature-card{ cursor:pointer; }
 
   /* ---------- Dictionary card (사전적 정의) ---------- */
   .dict-card{
@@ -593,7 +594,7 @@
           </div>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">이 넷은 전부, "무엇을 할지" <b>행동을 결정</b>하는 쪽이에요. FSM은 상태가 늘어날수록 전이가 기하급수적으로 늘어나서, 수십 개가 되면 Behavior Tree 같은 다른 방식을 더 많이 써요.</div>
         </div>
-        <div class="gif-popup gif-toggle" data-images="Midias/w7/7-1.gif,Midias/w7/7-2.gif,Midias/w7/7-3.gif,Midias/w7/7-4.gif">
+        <div class="gif-popup gif-toggle-cards" data-images="Midias/w7/7-1.gif,Midias/w7/7-2.gif,Midias/w7/7-3.gif,Midias/w7/7-4.gif">
           <img src="" alt="">
         </div>
       </div>
@@ -620,7 +621,7 @@
           </div>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">이 셋은 "무엇을 할지"가 아니라, <b>어떻게 움직일지 · 어떻게 배울지</b> 쪽이에요. 실제로는 같이 조합해서 써요 — 예를 들어, FSM으로 상태를 정하고 Path Finding으로 실제 이동 경로를 찾는 식으로요.</div>
         </div>
-        <div class="gif-popup gif-toggle" data-images="Midias/w7/8-1.gif,Midias/w7/8-2.gif,Midias/w7/8-3.gif">
+        <div class="gif-popup gif-toggle-cards" data-images="Midias/w7/8-1.gif,Midias/w7/8-2.gif,Midias/w7/8-3.gif">
           <img src="" alt="">
         </div>
       </div>
@@ -987,18 +988,196 @@ suspicion(의심치) = 최대치의 절반으로 시작</div>
       </div>
     </section>
 
-    <!-- ============ 오늘 정리 ============ -->
+    <!-- ============ 애니메이터 / 애니메이션 전환 ============ -->
+    <section>
+      <div class="slide-shell" data-page="22">
+        <div class="break-body">
+          <div class="break-eyebrow">Animation Controller / Animation</div>
+          <h2 class="break-hero">조금만 더 <span class="emph">자세하게</span>살펴봐요.</h2>
+          <div class="break-sub">엔진 열고. 가볼까요?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Parameter란? ============ -->
     <section>
       <div class="slide-shell" data-page="23">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">Parameter(파라미터)</span>란?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">정의</div>
+              <div class="feature-desc">Animator가 들고 있는 변수예요. 전이 조건을 걸거나, Blend Tree를 제어하는 데 써요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">Trigger — 오늘 우리가 쓴 타입</div>
+              <div class="feature-desc">한 번 켜지면, 전이에 쓰이고 나서 자동으로 꺼지는 스위치예요. "Alert", "Dead"처럼 한 번의 이벤트에 딱이에요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Float / Int</div>
+              <div class="feature-desc">숫자 값이에요. 조건 비교(예: Speed &gt; 0.1)에도 쓰고, 뒤에 나올 Blend Tree의 블렌드 기준으로도 써요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">Bool</div>
+              <div class="feature-desc">참/거짓, 계속 유지되는 상태 플래그예요. Trigger랑 달리, 직접 꺼주기 전까진 계속 켜져 있어요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">실제로 겪은 함정 — Poky 캐릭터 예제의 <span class="mono">AnimSpeed</span> / <span class="mono">MoveSpeedRatio</span> / <span class="mono">ReloadSpeed</span>는 전부 Float 파라미터인데, 기본값이 0이에요. 코드로 1을 안 넣어주면 재생속도가 0배라서 — 애니메이션이 그냥 멈춘 것처럼 보여요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Parameter를 코드로 컨트롤하기 ============ -->
+    <section>
+      <div class="slide-shell" data-page="24">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">그 Parameter, <span class="emph">코드</span>로는 이렇게 바꿔요</h2>
+          <div class="doc-card" style="flex:1;">
+            <div class="doc-title" style="font-size:22px;">PokyDemoController.cs <span class="tag">실제로 쓴 코드</span></div>
+            <div class="doc-section">
+              <div class="doc-code" style="font-size:13px; line-height:1.7;"><span class="code-cm">// Float — 무기 전환 시, Blend Tree가 참조하는 선택 값을 바꿔요</span>
+<span class="code-var">_anim</span>.<span class="code-fn">SetFloat</span>(<span class="code-str">"WeaponAnimType"</span>, <span class="code-var">_weaponAnimTypes</span>[<span class="code-var">slot</span>]);
+
+<span class="code-cm">// Bool — W를 누르고 있는 동안만 true, 떼면 바로 false</span>
+<span class="code-var">_anim</span>.<span class="code-fn">SetBool</span>(<span class="code-str">"IsMove"</span>, <span class="code-var">isMove</span>);
+
+<span class="code-cm">// Trigger — 좌클릭하는 순간 한 번, Any State에서 LockOn_BTree로</span>
+<span class="code-var">_anim</span>.<span class="code-fn">SetTrigger</span>(<span class="code-str">"LockOn"</span>);
+
+<span class="code-cm">// 지금 애니메이터 상태를 직접 물어보기도 해요 (Reload 끝났는지 폴링)</span>
+<span class="code-kw">while</span> (<span class="code-var">_anim</span>.<span class="code-fn">GetCurrentAnimatorStateInfo</span>(<span class="code-var">FireLayerIndex</span>).<span class="code-fn">IsName</span>(<span class="code-str">"Reload_BTree"</span>))
+    <span class="code-kw">yield</span> <span class="code-kw">return</span> <span class="code-kw">null</span>;</div>
+            </div>
+            <div class="doc-section" style="margin-top:10px;"><div class="d-label">실전 버그</div><div class="d-line placeholder">SetTrigger 직후 바로 상태를 체크하면 안 돼요 — 전이(크로스페이드 중)가 끝나기 전이라 "아직 그 상태 아님"으로 오판해요.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Layer란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="25">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">Layer(레이어)</span>란?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">정의</div>
+              <div class="feature-desc">Animator Controller 안에, 상태 머신을 여러 개 동시에 돌릴 수 있어요. 그 각각이 "레이어"예요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">Avatar Mask</div>
+              <div class="feature-desc">레이어마다, 몸의 어느 부위에 적용할지 지정할 수 있어요 — 상체만, 하체만 같은 식으로요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Layer Weight</div>
+              <div class="feature-desc">이 레이어가, 아래 레이어 위에 얼마나 "섞일지"를 0~1 가중치로 조절해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">예시 — Poky의 Fire Layer</div>
+              <div class="feature-desc">Base Layer(0)는 전신 이동, Fire Layer(1)는 AvatarMask로 상체만 — 락온하면 다리는 Base Layer 그대로 걷고, 상체만 조준 포즈가 덧씌워져요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">실전 디테일 — Layer weight를 0/1로 즉시 토글하면 뚝뚝 끊겨 보여요. <span class="mono">Mathf.MoveTowards</span>로 매 프레임 조금씩 따라가게 해서, 짧게라도 블렌딩되게 했어요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Blend Tree란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="26">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">Blend Tree(블렌드 트리)</span>란?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">정의</div>
+              <div class="feature-desc">여러 애니메이션 클립을, 파라미터 값에 따라 부드럽게 섞어서 재생하는 특수한 State예요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">1D Blend</div>
+              <div class="feature-desc">파라미터 하나로 섞어요. Poky 예제도 Speed(0~1) 값으로 Walk ↔ Run을 섞는 1D Blend Tree예요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">2D Blend</div>
+              <div class="feature-desc">파라미터 두 개로 섞어요. <b>Freeform Directional</b>을 쓰면, (X,Y)를 "방향 + 크기"로 해석해서 이동 방향에 맞는 모션끼리 자연스럽게 섞어요. 방향이 아니라 그냥 값 두 개를 섞고 싶으면 <b>Freeform Cartesian</b>을 써요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">일반 전이랑 뭐가 다를까?</div>
+              <div class="feature-desc">보통 Transition도 Transition Duration으로 이미 블렌딩(크로스페이드)해요. Blend Tree의 진짜 차이는 — 연속된 값의 범위를, State 하나로 압축한다는 거예요. 속도마다 상태를 따로 만들 필요가 없어요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">실전 팁 — Blend Tree는 중첩할 수 있어요. Poky는 바깥쪽 1D Blend Tree가 WeaponAnimType(정수 값 1·3·7·9·14...)으로 "어떤 무기 세트인지"부터 고르고, 그 안에서 또 Speed로 Walk/Run을 섞어요. 무기별로 전체 State를 따로 만들 필요가 없어졌어요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2D Blend Type 세 가지 ============ -->
+    <section>
+      <div class="slide-shell" data-page="27">
+        <div class="body-wrap">
+          <h2 class="section-title">2D Blend Type, <span class="emph">세 가지</span>가 있어요</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><s><div class="feature-title">Simple Directional</div>
+              <div class="feature-desc">모션들이 서로 다른 방향을 가리키고, 겹치지 않을 때 써요. 보통 중심(Idle) 하나 + 방향별 모션들로 구성해요.</div></s></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><s><div class="feature-title">Freeform Directional</div>
+              <div class="feature-desc">같은 방향에 모션이 여러 개 있어도 돼요(걷기 · 뛰기가 둘 다 "전방"인 경우 등). (X,Y)를 방향 + 크기로 해석해서 섞어요.</div></s></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><s><div class="feature-title">Freeform Cartesian</div>
+              <div class="feature-desc">방향이 아니라, 그냥 독립된 값 두 개를 섞고 싶을 때 써요. 예: 표정의 "화남" 정도 + "슬픔" 정도.</div></s></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><s><div class="feature-title">그래서, 실제로는?</div>
+              <div class="feature-desc">전후좌우로 움직이는 애니메이션을 블렌딩한다면 Directional 계열, 표정처럼 방향 의미가 없는 값이면 Cartesian이에요. 근데 Poky는 "무기 종류 + 속도"처럼 둘 다 방향이 아닌 값이라, 2D 대신 1D Blend Tree를 중첩해서 썼어요 — 2D가 항상 정답은 아니에요.</div></s></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Animation Event란? ============ -->
+    <section>
+      <div class="slide-shell" data-page="28">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">Animation Event</span>란?</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">보내는 쪽 — 클립이 이벤트를 쏴요</div>
+              <div class="feature-desc">애니메이션 클립의 특정 프레임에 이벤트가 심어져 있어요. 재생 중 그 프레임에 도달하면, Animator가 자동으로 "메시지"를 하나 보내요 — 메서드 이름 하나(+파라미터 하나)만 들고요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">보내는 방식 — SendMessage</div>
+              <div class="feature-desc">직접 함수를 호출하는 게 아니라 <span class="mono">SendMessage</span> 방식이에요. 그래서 컴파일 타임엔 받는 메서드가 있는지 전혀 체크 안 해요 — 없으면 실행 중에야 드러나요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">받는 쪽 없으면 — 에러</div>
+              <div class="feature-desc">Animator가 붙은 그 GameObject의 컴포넌트 중에서, 이벤트와 이름이 "완전히 똑같은" 메서드를 찾는데 못 찾으면 콘솔에 <b>에러</b>로 찍혀요("has no receiver!"). 다만 그 프레임만 못 보내고 넘어갈 뿐, 애니메이션 재생 자체가 멈추진 않아요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">실제로 처리한 사례</div>
+              <div class="feature-desc">"AnimationEvent 'Footstep' ... has no receiver!" — Poky의 걷기 클립엔 발소리 타이밍용 Footstep 이벤트가 이미 심어져 있었어요. 이벤트는 안 지우고, 받는 메서드만 빈 채로 추가했어요(<span class="mono">void Footstep() {}</span>). 나중에 발소리 SFX 넣고 싶으면 그 안에 채우기만 하면 돼요.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘 정리 ============ -->
+    <section>
+      <div class="slide-shell" data-page="29">
         <div class="body-wrap">
           <h2 class="section-title">오늘, <span class="emph">이 것들</span>을 기억해요</h2>
           <div class="why-list" style="margin-top:24px;">
             <div class="why-item"><span class="check">✓</span>FSM의 상태(State) · 전이(Transition)는, Mecanim의 Animator Controller로 그대로 옮길 수 있어요.</div>
             <div class="why-item"><span class="check">✓</span>StateMachineBehaviour: OnStateEnter · OnStateUpdate · OnStateExit — 상태 하나하나에 직접 붙는 스크립트예요.</div>
-            <div class="why-item"><span class="check">✓</span>같은 Animator Controller를 써도, Animator(오브젝트)마다 변수는 따로 생성돼서 안 섞여요.</div>
-            <div class="why-item"><span class="check">✓</span>HP ≤ 0 같은 공통 조건은, Any State 전이로 어떤 상태에 있든 한 곳(Dead)으로 모을 수 있어요.</div>
-            <div class="why-item"><span class="check">✓</span>발사처럼 반복되는 행동은, 상태를 안 떠나고 OnStateUpdate 안에서 반복해도 괜찮아요.</div>
-            <div class="why-item"><span class="check">✓</span>모든 걸 FSM으로 만들 필요는 없어요 — 총알처럼 상태가 사실상 하나면, 그냥 MonoBehaviour로 충분해요.</div>
+            <!--div class="why-item"><span class="check">✓</span>같은 Animator Controller를 써도, Animator(오브젝트)마다 변수는 따로 생성돼서 안 섞여요.</div-->
+            <div class="why-item"><span class="check">✓</span><b>Any State</b> 전이로 어떤 상태에 있든 한 State 로 전이시킬 수 있어요.</div>
+            <!--div class="why-item"><span class="check">✓</span>발사처럼 반복되는 행동은, 상태를 안 떠나고 OnStateUpdate 안에서 반복해도 괜찮아요.</div-->
+            <!--div class="why-item"><span class="check">✓</span>모든 걸 FSM으로 만들 필요는 없어요 — 총알처럼 상태가 사실상 하나면, 그냥 MonoBehaviour로 충분해요.</div-->
+            <div class="why-item"><span class="check">✓</span>Layer + AvatarMask로 상체·하체를 나눠 섞으면, 걸으면서 쏘는 동작도 State 하나 안 늘리고 만들 수 있어요.</div>
+            <div class="why-item"><span class="check">✓</span>SetTrigger 직후 바로 상태를 체크하면 안 돼요 — 전이(크로스페이드)가 끝날 때까지 기다려야 해요.</div>
           </div>
         </div>
       </div>
@@ -1033,7 +1212,7 @@ suspicion(의심치) = 최대치의 절반으로 시작</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script>
-  const TOTAL_PAGES = 23;
+  const TOTAL_PAGES = 29;
   const FOOTER_TAG = 'WEEK 07';
 
   document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
@@ -1082,6 +1261,35 @@ suspicion(의심치) = 최대치의 절반으로 시작</div>
         img.src = srcs[idx];
         popup.classList.add('show');
       }
+    });
+  });
+
+  // ---------- GIF 카드별 토글 팝업 (카드 하나당 이미지 하나 — 그 카드 클릭하면 보이고, 다시 클릭하면 숨겨짐) ----------
+  document.querySelectorAll('.gif-toggle-cards').forEach(popup => {
+    const slide = popup.closest('.slide-shell');
+    const img = popup.querySelector('img');
+    const srcs = popup.dataset.images.split(',');
+    const cards = slide.querySelectorAll('.feature-card');
+    let activeIdx = -1;
+
+    cards.forEach((card, i) => {
+      if (i >= srcs.length) return;
+      card.addEventListener('click', () => {
+        if (activeIdx === i) {
+          popup.classList.remove('show');
+          activeIdx = -1;
+        } else {
+          img.src = srcs[i];
+          popup.classList.add('show');
+          activeIdx = i;
+        }
+      });
+    });
+
+    // 팝업이 떠 있는 상태에서 배경(이미지 바깥) 클릭하면 닫혀요.
+    popup.addEventListener('click', () => {
+      popup.classList.remove('show');
+      activeIdx = -1;
     });
   });
 
