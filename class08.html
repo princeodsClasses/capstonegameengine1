@@ -321,22 +321,6 @@
   section.present .break-body .break-hero{ animation:fadeUp .6s ease-out .15s both; }
   section.present .break-body .break-sub{ animation:fadeUp .6s ease-out .35s both; }
 
-  /* ---------- VS 카드 ---------- */
-  @keyframes vsSlideLeft{
-    0%{ opacity:0; transform:translateX(-420px); }
-    55%{ opacity:1; transform:translateX(0); }
-    100%{ opacity:1; transform:translateX(-30px); }
-  }
-  @keyframes vsSlideRight{
-    0%{ opacity:0; transform:translateX(420px); }
-    55%{ opacity:1; transform:translateX(0); }
-    100%{ opacity:1; transform:translateX(30px); }
-  }
-  .vs-card-tiger, .vs-card-lion, .vs-badge{ opacity:0; }
-  section.present .vs-card-tiger{ animation:vsSlideLeft 1.1s cubic-bezier(.25,.46,.45,.94) .1s both; }
-  section.present .vs-card-lion{ animation:vsSlideRight 1.1s cubic-bezier(.25,.46,.45,.94) .45s both; }
-  section.present .vs-badge{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1) 1.3s both; }
-
   /* ---------- Dictionary card (사전적 정의) ---------- */
   .dict-card{
     display:flex; flex-direction:column; width:100%; max-width:760px;
@@ -359,12 +343,6 @@
   .content-popup.show{ display:flex; }
   .content-popup-inner{ max-width:960px; width:100%; cursor:default; }
   html.print-pdf .content-popup{ display:none !important; }
-
-  /* ---------- 클릭할 때마다 하나씩 더 보여주는 범용 리빌 ---------- */
-  .click-reveal-2{ cursor:pointer; }
-  .reveal-step{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease; pointer-events:none; }
-  .reveal-step.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
-  html.print-pdf .reveal-step{ opacity:1 !important; transform:none !important; }
 
   /* ---------- 건물 단면도 클릭 리빌 (바닥부터 / 지붕부터) ---------- */
   .house-reveal-slide{ cursor:pointer; }
@@ -399,7 +377,6 @@
   html.print-pdf .why-item, html.print-pdf .doc-card,
   html.print-pdf .teaser-icon, html.print-pdf .teaser-question, html.print-pdf .teaser-caption,
   html.print-pdf .break-eyebrow, html.print-pdf .break-hero, html.print-pdf .break-sub,
-  html.print-pdf .vs-card-tiger, html.print-pdf .vs-card-lion, html.print-pdf .vs-badge,
   html.print-pdf .dict-card,
   html.print-pdf .data-table tbody tr, html.print-pdf .p10-note, html.print-pdf .p10-proof-img img{
     animation:none !important; opacity:1 !important; transform:none !important; clip-path:none !important;
@@ -801,9 +778,20 @@
       </div>
     </section>
 
-    <!-- ============ 같은 데이터 테이블, 다른 책임 ============ -->
+    <!-- ============ PART 3 전환 (기획) ============ -->
     <section>
       <div class="slide-shell" data-page="11">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 3 · 기획</div>
+          <h2 class="break-hero">근데, 그 데이터 전부 <span class="emph">같은 데이터</span>일까요?</h2>
+          <div class="break-sub">조금 더 들어가볼게요 — <span class="accent">정적</span>인 것과 <span class="accent">동적</span>인 것.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 같은 데이터 테이블, 다른 책임 ============ -->
+    <section>
+      <div class="slide-shell" data-page="12">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">게임으로 보면, 같은 <span class="emph">데이터</span>, 다른 책임.</h2>
           <div style="overflow-x:auto; margin-top:18px;">
@@ -838,7 +826,7 @@
 
     <!-- ============ 흔한 오해 (+ 클릭 팝업: 데이터 테이블/데이터베이스) ============ -->
     <section>
-      <div class="slide-shell popup-reveal-slide" data-page="12">
+      <div class="slide-shell popup-reveal-slide" data-page="13">
         <div class="body-wrap">
           <h2 class="section-title">시스템 디자인과 데이터, 흔한 <span class="emph">오해</span>들.</h2>
           <div class="obj-grid">
@@ -892,7 +880,7 @@
 
     <!-- ============ PART 4 전환 (엔진) ============ -->
     <section>
-      <div class="slide-shell" data-page="13">
+      <div class="slide-shell" data-page="14">
         <div class="break-body">
           <div class="break-eyebrow">PART 4 · 엔진</div>
           <h2 class="break-hero">그럼, 엔진에서는<br>이 둘을 <span class="emph">어떻게</span> 다룰까요?</h2>
@@ -911,7 +899,7 @@
 
     <!-- ============ 정적 데이터 처리 도구 ============ -->
     <section>
-      <div class="slide-shell" data-page="14">
+      <div class="slide-shell" data-page="15">
         <div class="body-wrap">
           <h2 class="section-title"><span class="emph">정적</span> 데이터, 이렇게 다뤄요</h2>
           <div class="obj-grid">
@@ -938,7 +926,7 @@
 
     <!-- ============ 동적 데이터 처리 도구 ============ -->
     <section>
-      <div class="slide-shell" data-page="15">
+      <div class="slide-shell" data-page="16">
         <div class="body-wrap">
           <h2 class="section-title"><span class="emph">동적</span> 데이터, 이렇게 다뤄요</h2>
           <div class="obj-grid">
@@ -966,7 +954,7 @@
 
     <!-- ============ 같은 캐릭터, 데이터만 바꿔 끼우기 ============ -->
     <section>
-      <div class="slide-shell" data-page="16">
+      <div class="slide-shell" data-page="17">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">같은 캐릭터, <span class="emph">다섯 가지</span>로 비교해봐요</h2>
           <div class="intro-note" style="font-size:13px; color:var(--ink-faint); margin-top:4px;">7주차 호랑이 · 사자 FSM 그대로예요. <code>Character</code>에 구멍 하나만 뚫어뒀어요.</div>
@@ -991,7 +979,7 @@
 
     <!-- ============ 다섯 가지, 이런 차이가 있어요 ============ -->
     <section>
-      <div class="slide-shell" data-page="17">
+      <div class="slide-shell" data-page="18">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title">다섯 가지, <span class="emph">이런 차이</span>가 있어요</h2>
           <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:2px; min-height:0;">
@@ -1068,7 +1056,7 @@
 
     <!-- ============ ② ScriptableObject 자세히 ============ -->
     <section>
-      <div class="slide-shell" data-page="18">
+      <div class="slide-shell" data-page="19">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title"><span class="emph">ScriptableObject</span> 버전</h2>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">유니티 에셋 그 자체예요. 코드 없이, 기획자가 Inspector에서 값만 바꿔도 돼요. <span class="mono">PlayFSM_SO</span></div>
@@ -1111,7 +1099,7 @@
 
     <!-- ============ ③ CSV 자세히 ============ -->
     <section>
-      <div class="slide-shell" data-page="19">
+      <div class="slide-shell" data-page="20">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title"><span class="emph">CSV</span> 버전</h2>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">엑셀처럼 표로 관리 — 대량의 데이터를 줄 단위로 읽어요. <span class="mono">PlayFSM_CSV</span></div>
@@ -1156,7 +1144,7 @@
 
     <!-- ============ ④ XML 자세히 ============ -->
     <section>
-      <div class="slide-shell" data-page="20">
+      <div class="slide-shell" data-page="21">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title"><span class="emph">XML</span> 버전</h2>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">태그로 구조를 감싸요 — 스키마로 형식을 강제하기 좋아요. <span class="mono">PlayFSM_XML</span></div>
@@ -1212,7 +1200,7 @@
 
     <!-- ============ ⑤ JSON 자세히 ============ -->
     <section>
-      <div class="slide-shell" data-page="21">
+      <div class="slide-shell" data-page="22">
         <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
           <h2 class="section-title"><span class="emph">JSON</span> 버전</h2>
           <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">가장 가볍고 범용적 — 서버 · 웹과도 그대로 주고받아요. <span class="mono">PlayFSM_JSON</span></div>
@@ -1271,7 +1259,7 @@
 
     <!-- ============ 오늘 정리 ============ -->
     <section>
-      <div class="slide-shell" data-page="22">
+      <div class="slide-shell" data-page="23">
         <div class="body-wrap">
           <h2 class="section-title">오늘, <span class="emph">이 것들</span>을 기억해요.</h2>
           <div class="why-list" style="margin-top:24px;">
@@ -1314,7 +1302,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
 <script>
-  const TOTAL_PAGES = 22;
+  const TOTAL_PAGES = 23;
   const FOOTER_TAG = 'WEEK 08';
 
   document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
@@ -1334,16 +1322,6 @@
     const popup = slide.querySelector('.content-popup');
     slide.addEventListener('click', () => {
       popup.classList.toggle('show');
-    });
-  });
-
-  // ---------- 범용 클릭 리빌 (reveal-step을 순서대로 하나씩, 끝까지 가면 리셋) ----------
-  document.querySelectorAll('.click-reveal-2').forEach(slide => {
-    const steps = slide.querySelectorAll('.reveal-step');
-    let step = 0;
-    slide.addEventListener('click', () => {
-      step = (step + 1) % (steps.length + 1);
-      steps.forEach((el, i) => el.classList.toggle('show', step > i));
     });
   });
 
