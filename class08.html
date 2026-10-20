@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>8주차 · 시스템 디자인과 데이터 — Capstone Game Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root{
+    --sky-1: #bdeaff;
+    --sky-2: #eaf9ff;
+    --grass: #6bc55a;
+    --grass-dark: #4a9e3d;
+    --blue: #1f9be0;
+    --blue-dark: #0f7fc2;
+    --yellow: #ffce3d;
+    --yellow-dark: #f2a900;
+    --pink: #ff6fae;
+    --pink-dark: #d94c8a;
+    --green: #3ddc6a;
+    --green-dark: #1fb852;
+    --ink: #1b2b3a;
+    --ink-soft: #3a5266;
+    --ink-faint: rgba(27,43,58,.45);
+    --white: #ffffff;
+    --dash: rgba(27,43,58,.20);
+    --card-shadow: 0 4px 0 rgba(0,0,0,.08);
+    --card-shadow-lg: 0 8px 0 rgba(0,0,0,.10), 0 16px 28px #0000001a;
+  }
+  *{box-sizing:border-box;}
+  html, body{background:var(--sky-2); margin:0; padding:0;}
+  .reveal{font-family:'Nunito',sans-serif; color:var(--ink);}
+  .reveal .slides{text-align:left;}
+  .reveal .slides section{
+    background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 55%, #eafce0 100%);
+    height:100%; padding:0;
+  }
+  .reveal .slides section.plain-white{ background:#fff; }
+  .img-credit{ position:absolute; right:16px; bottom:12px; font-size:11px; color:var(--ink-faint); }
+  .display{font-family:'Baloo 2',sans-serif;}
+  .mono{font-family:'Nunito',sans-serif; font-weight:800;}
+
+  /* ---------- shared slide shell ---------- */
+  .slide-shell{
+    position:relative; height:100%; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:36px 56px;
+  }
+  .cloud{ position:absolute; background:#fff; border-radius:50%; opacity:.6;
+    animation: drift 2s ease-in-out infinite alternate; }
+  @keyframes drift{ from{transform:translateX(0);} to{transform:translateX(50px);} }
+
+  /* ---------- top / bottom bars ---------- */
+  .cs-header{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:32px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .brand-badge{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+    box-shadow:0 3px 0 var(--blue-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:16px; color:#fff;
+  }
+  .brand span{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:var(--ink);
+  }
+
+  .cs-footer{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .chip-tag{
+    background:rgba(255,255,255,.85); border-radius:999px; padding:8px 18px;
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; letter-spacing:.4px; color:var(--ink-soft);
+    box-shadow:var(--card-shadow);
+  }
+  .chip-tag b{color:var(--ink);}
+
+  /* ---------- headline system ---------- */
+  .section-title{
+    font-family:'Baloo 2',sans-serif !important;
+    font-size:34px !important; font-weight:700 !important;
+    color:var(--ink) !important; margin:0 !important;
+  }
+  .section-title .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%);
+    padding:0 4px;
+  }
+  .body-wrap{ position:relative; z-index:3; flex:1; min-height:0; display:flex; flex-direction:column; justify-content:flex-start; }
+
+  /* ---------- Title slide ---------- */
+  .title-stage{ padding:32px 48px; }
+  .pill-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px;
+    padding:8px 20px; border-radius:999px;
+    box-shadow:0 4px 0 var(--yellow-dark);
+    margin-bottom:24px;
+  }
+  .title-main{ display:flex; align-items:center; justify-content:center; height:100%; padding:0 8px; }
+  .title-copy{ max-width:760px; text-align:center; }
+  .headline-hero{
+    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:84px !important; line-height:1.05 !important;
+    color:var(--white) !important; margin:0 !important; letter-spacing:-1px;
+    -webkit-text-stroke:7px var(--ink); paint-order:stroke fill;
+    filter:drop-shadow(0 8px 0 rgba(0,0,0,.15));
+  }
+  .subline{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--ink-soft); margin-top:22px; }
+
+  /* ---------- Feature cards ---------- */
+  .obj-grid{ display:flex; flex-direction:column; gap:14px; margin-top:34px; }
+  .feature-card{ display:flex; gap:18px; align-items:flex-start; padding:20px 26px; border-radius:16px;
+    background:var(--white); box-shadow:var(--card-shadow); }
+  .feature-num{ font-family:'Baloo 2',sans-serif; font-size:18px; color:var(--blue-dark); font-weight:800; flex:0 0 auto; }
+  .feature-title{ font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+  .feature-desc{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Step cards ---------- */
+  .step-cards{ width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:36px; align-items:stretch; }
+  .step-card{
+    position:relative; background:var(--white);
+    border:3px solid var(--c); border-radius:22px 22px 70px 70px;
+    padding:52px 26px 32px; text-align:center; box-shadow:var(--card-shadow);
+  }
+  .step-icon{
+    position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+    width:56px; height:56px; border-radius:50%; background:var(--c);
+    box-shadow:0 4px 0 rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .step-label{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:13px; letter-spacing:1px; color:var(--c); margin-bottom:10px; }
+  .step-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:var(--ink); margin-bottom:12px; line-height:1.3; }
+  .step-desc{ font-size:13px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Teaser (질문 reveal) ---------- */
+  .teaser-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:22px; }
+  .teaser-icon{ position:relative; width:130px; height:130px; display:flex; align-items:center; justify-content:center; }
+  .teaser-icon .power-emoji{ position:relative; font-size:52px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15)); }
+  .teaser-question{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:44px; line-height:1.45;
+    letter-spacing:-.5px; color:var(--ink); max-width:800px;
+    text-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
+  .teaser-question.small{ font-size:34px; max-width:720px; }
+  .teaser-question .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 6px;
+  }
+  .teaser-caption{ font-size:12px; letter-spacing:1.5px; color:var(--ink-faint); }
+
+  /* ---------- Doc card (코드 예시) ---------- */
+  .doc-card{
+    background:var(--ink); border-radius:20px; padding:26px 34px;
+    box-shadow:var(--card-shadow-lg); flex:1;
+  }
+  .doc-card .doc-title{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:35px; color:#fff; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .doc-card .doc-title .tag{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; letter-spacing:.6px;
+    background:var(--yellow); color:var(--ink); padding:3px 10px; border-radius:8px;
+  }
+  .doc-section{ margin-bottom:12px; }
+  .doc-section .d-label{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--yellow);
+    border-left:3px solid var(--yellow); padding-left:8px; margin-bottom:4px;
+  }
+  .doc-section .d-line{ font-size:15px; color:#dfe8ee; line-height:1.55; padding-left:11px; }
+  .doc-section .d-line.placeholder{ color:rgba(223,232,238,.45); font-style:italic; }
+  .doc-card.doc-compact{ padding:22px 30px; }
+  .doc-card.doc-compact .doc-title{ font-size:26px; margin-bottom:14px; }
+  .doc-card.doc-compact .doc-section{ display:flex; align-items:baseline; gap:10px; margin-bottom:11px; }
+  .doc-card.doc-compact .doc-section .d-label{ font-size:16px; margin-bottom:0; flex:0 0 auto; }
+  .doc-card.doc-compact .doc-section .d-line{ font-size:14.5px; line-height:1.5; padding-left:0; }
+  .doc-code{
+    font-family:'Consolas','Menlo',monospace; font-size:13.5px; line-height:1.7; color:#d4d4d4;
+    background:#1e1e1e; border-radius:10px; padding:14px 18px; white-space:pre-wrap;
+    margin-left:11px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .code-kw{ color:#569cd6; }
+  .code-type{ color:#4ec9b0; }
+  .code-fn{ color:#dcdcaa; }
+  .code-str{ color:#ce9178; }
+  .code-cm{ color:#6a9955; }
+  .code-var{ color:#9cdcfe; }
+  .doc-columns{ display:flex; gap:24px; margin-top:18px; flex:1; }
+
+  /* ---------- Timeline-like list (오늘 정리) ---------- */
+  .why-list{ display:flex; flex-direction:column; gap:20px; margin-top:20px; }
+  .why-item{
+    display:flex; align-items:center; gap:14px; background:var(--white); border-radius:14px;
+    padding:22px 32px; box-shadow:var(--card-shadow); font-size:15px; color:var(--ink-soft); font-weight:600;
+  }
+  .why-item .check{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:var(--green);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
+    box-shadow:0 2px 0 var(--green-dark);
+  }
+
+  /* ---------- Closing ---------- */
+  .break-body{ position:relative; z-index:3; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .break-eyebrow{ font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--ink-faint); letter-spacing:1px; margin-bottom:22px; }
+  .break-hero{ font-family:'Baloo 2',sans-serif !important; font-size:46px !important; font-weight:800 !important; color:#000 !important; line-height:1.35 !important; max-width:840px; margin:0 !important; }
+  .break-hero .emph{ color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 4px; }
+  .break-sub{ font-size:16px; color:var(--ink-soft); margin-top:26px; max-width:760px; line-height:1.7; }
+  .break-sub .accent{ color:var(--blue-dark); font-weight:800; }
+
+  /* ---------- Home button ---------- */
+  .home-btn{
+    position:fixed; top:20px; left:24px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--white); color:var(--ink); text-decoration:none;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px;
+    padding:9px 16px; border-radius:999px; box-shadow:var(--card-shadow);
+  }
+  .home-btn:hover{ box-shadow:var(--card-shadow-lg); }
+
+  /* ---------- Cursor trail ---------- */
+  #cursorTrail{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999; }
+
+  /* ---------- Card hover invert ---------- */
+  .feature-card, .step-card, .why-item{
+    transition: background .22s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .feature-card:hover, .step-card:hover, .why-item:hover{
+    transform:translateY(-3px); box-shadow:var(--card-shadow-lg); cursor:default;
+  }
+  .feature-card:nth-child(4n+1):hover{ background:var(--blue-dark); }
+  .feature-card:nth-child(4n+2):hover{ background:var(--green-dark); }
+  .feature-card:nth-child(4n+3):hover{ background:var(--pink-dark); }
+  .feature-card:nth-child(4n+4):hover{ background:var(--yellow-dark); }
+  .feature-card:hover .feature-num, .feature-card:hover .feature-title, .feature-card:hover .feature-desc{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .step-card:hover{ background:var(--c); }
+  .step-card:hover .step-icon{ background:#fff; }
+  .step-card:hover .step-label, .step-card:hover .step-title, .step-card:hover .step-desc{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .why-item:hover{ background:var(--green-dark); color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+  .why-item:hover .check{ background:#fff; color:var(--green-dark); }
+
+  /* ---------- Entrance animations ---------- */
+  @keyframes fadeUp{ 0%{ opacity:0; transform:translateY(16px); } 100%{ opacity:1; transform:translateY(0); } }
+  @keyframes popIn{ 0%{ opacity:0; transform:scale(.82); } 100%{ opacity:1; transform:scale(1); } }
+  @keyframes drawPath{ to{ stroke-dashoffset:0; } }
+
+  /* ---------- p10: 데이터 테이블 예시 등장 연출 ---------- */
+  section.present .data-table tbody tr{ animation:fadeUp .45s ease-out both; }
+  section.present .data-table tbody tr:nth-child(1){ animation-delay:.1s; }
+  section.present .data-table tbody tr:nth-child(2){ animation-delay:.22s; }
+  section.present .data-table tbody tr:nth-child(3){ animation-delay:.34s; }
+
+  section.present .p10-sys-con .feature-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .p10-sys-con .feature-card:nth-child(1){ animation-delay:.5s; }
+  section.present .p10-sys-con .feature-card:nth-child(2){ animation-delay:.64s; }
+
+  section.present .p10-note{ animation:fadeUp .5s ease-out .8s both; }
+  section.present .p10-proof-img img{ animation:popIn .6s cubic-bezier(.34,1.56,.64,1) 1s both; }
+
+  section.present .mini-row .mini-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .mini-row .mini-card:nth-child(1){ animation-delay:.1s; }
+  section.present .mini-row .mini-card:nth-child(2){ animation-delay:.26s; }
+  section.present .mini-row .mini-card:nth-child(3){ animation-delay:.42s; }
+
+  section.present .tag-row .tag-pill{ animation:fadeUp .4s ease-out both; }
+  section.present .tag-row .tag-pill:nth-child(1){ animation-delay:.75s; }
+  section.present .tag-row .tag-pill:nth-child(2){ animation-delay:.82s; }
+  section.present .tag-row .tag-pill:nth-child(3){ animation-delay:.89s; }
+  section.present .tag-row .tag-pill:nth-child(4){ animation-delay:.96s; }
+  section.present .tag-row .tag-pill:nth-child(5){ animation-delay:1.03s; }
+  section.present .tag-row .tag-pill:nth-child(6){ animation-delay:1.1s; }
+
+  /* 미니 SVG 다이어그램이 스스로 그려지는 효과 */
+  .draw-path{ stroke-dasharray:1; stroke-dashoffset:1; }
+  section.present .draw-path{ animation:drawPath .9s ease-out both; }
+  .svg-pop{ opacity:0; transform-box:fill-box; transform-origin:center; }
+  section.present .svg-pop{ animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
+  html.print-pdf .draw-path{ animation:none !important; stroke-dashoffset:0 !important; }
+  html.print-pdf .svg-pop{ animation:none !important; opacity:1 !important; transform:none !important; }
+
+  section.present .title-stage .pill-tag{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .title-stage .headline-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .title-stage .subline{ animation:fadeUp .6s ease-out .3s both; }
+
+  section.present .obj-grid .feature-card{ animation:fadeUp .55s ease-out both; }
+  section.present .obj-grid .feature-card:nth-child(1){ animation-delay:.1s; }
+  section.present .obj-grid .feature-card:nth-child(2){ animation-delay:.22s; }
+  section.present .obj-grid .feature-card:nth-child(3){ animation-delay:.34s; }
+  section.present .obj-grid .feature-card:nth-child(4){ animation-delay:.46s; }
+
+  section.present .step-cards .step-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .step-cards .step-card:nth-child(1){ animation-delay:.1s; }
+  section.present .step-cards .step-card:nth-child(2){ animation-delay:.28s; }
+  section.present .step-cards .step-card:nth-child(3){ animation-delay:.46s; }
+  section.present .step-cards .step-card:nth-child(4){ animation-delay:.64s; }
+
+  section.present .why-list .why-item{ animation:fadeUp .5s ease-out both; }
+  section.present .why-list .why-item:nth-child(1){ animation-delay:.05s; }
+  section.present .why-list .why-item:nth-child(2){ animation-delay:.15s; }
+  section.present .why-list .why-item:nth-child(3){ animation-delay:.25s; }
+  section.present .why-list .why-item:nth-child(4){ animation-delay:.35s; }
+  section.present .why-list .why-item:nth-child(5){ animation-delay:.45s; }
+
+  section.present .doc-columns .doc-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .doc-columns .doc-card:nth-child(1){ animation-delay:.1s; }
+  section.present .doc-columns .doc-card:nth-child(2){ animation-delay:.28s; }
+
+  section.present .teaser-wrap .teaser-icon{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .teaser-wrap .teaser-question{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .teaser-wrap .teaser-caption{ animation:fadeUp .5s ease-out .35s both; }
+
+  section.present .break-body .break-eyebrow{ animation:fadeUp .5s ease-out both; }
+  section.present .break-body .break-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .break-body .break-sub{ animation:fadeUp .6s ease-out .35s both; }
+
+  /* ---------- VS 카드 ---------- */
+  @keyframes vsSlideLeft{
+    0%{ opacity:0; transform:translateX(-420px); }
+    55%{ opacity:1; transform:translateX(0); }
+    100%{ opacity:1; transform:translateX(-30px); }
+  }
+  @keyframes vsSlideRight{
+    0%{ opacity:0; transform:translateX(420px); }
+    55%{ opacity:1; transform:translateX(0); }
+    100%{ opacity:1; transform:translateX(30px); }
+  }
+  .vs-card-tiger, .vs-card-lion, .vs-badge{ opacity:0; }
+  section.present .vs-card-tiger{ animation:vsSlideLeft 1.1s cubic-bezier(.25,.46,.45,.94) .1s both; }
+  section.present .vs-card-lion{ animation:vsSlideRight 1.1s cubic-bezier(.25,.46,.45,.94) .45s both; }
+  section.present .vs-badge{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1) 1.3s both; }
+
+  /* ---------- Dictionary card (사전적 정의) ---------- */
+  .dict-card{
+    display:flex; flex-direction:column; width:100%; max-width:760px;
+    background:var(--white); border-radius:24px; padding:36px 44px;
+    box-shadow:var(--card-shadow-lg);
+  }
+  .dict-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:16px;
+    padding-bottom:14px; border-bottom:2px solid rgba(27,43,58,.1);
+  }
+  .dict-word{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:var(--ink); }
+  .dict-body{ font-size:16px; color:var(--ink); line-height:1.7; }
+
+  /* ---------- 클릭하면 뜨는 팝업(슬라이드 하나로 접기) ---------- */
+  .popup-reveal-slide{ cursor:pointer; }
+  .content-popup{
+    position:absolute; inset:0; z-index:30; display:none;
+    align-items:center; justify-content:center; background:rgba(8,12,17,.97); padding:40px;
+  }
+  .content-popup.show{ display:flex; }
+  .content-popup-inner{ max-width:960px; width:100%; cursor:default; }
+  html.print-pdf .content-popup{ display:none !important; }
+
+  /* ---------- 클릭할 때마다 하나씩 더 보여주는 범용 리빌 ---------- */
+  .click-reveal-2{ cursor:pointer; }
+  .reveal-step{ opacity:0; transform:translateY(10px); transition:opacity .5s ease, transform .5s ease; pointer-events:none; }
+  .reveal-step.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  html.print-pdf .reveal-step{ opacity:1 !important; transform:none !important; }
+
+  /* ---------- 건물 단면도 클릭 리빌 (바닥부터 / 지붕부터) ---------- */
+  .house-reveal-slide{ cursor:pointer; }
+  .house-pic{ transform-box:fill-box; transform:scaleY(0); transition:transform .9s cubic-bezier(.22,.9,.3,1); }
+  .house-pic.house-left{ transform-origin:bottom; }
+  .house-pic.house-right{ transform-origin:top; }
+  .house-pic.show{ transform:scaleY(1); }
+  .house-caption{ opacity:0; transition:opacity .6s ease .3s; }
+  .house-caption.show{ opacity:1; }
+
+  /* ---------- 디자인 2단 패널 (시스템 vs 콘텐츠 · 하는 일) ---------- */
+  .panel-2col{ display:flex; gap:20px; flex:1; margin-top:16px; min-height:0; }
+  .design-panel{ flex:1; background:rgba(255,255,255,.55); border-radius:20px; padding:22px 26px; box-shadow:var(--card-shadow); display:flex; flex-direction:column; min-width:0; }
+  .design-panel-head .dp-title{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:21px; }
+  .design-panel-head .dp-sub{ font-size:13px; color:var(--ink-faint); font-weight:700; margin-top:3px; }
+  .mini-row{ display:flex; gap:16px; flex:1; margin-top:18px; }
+  .mini-card{ flex:1; background:var(--white); border-radius:14px; padding:16px 18px; box-shadow:var(--card-shadow); display:flex; flex-direction:column; min-width:0; }
+  .mini-card .mc-title{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:26px; color:var(--ink); margin-bottom:9px; }
+  .mini-card .mc-body{ font-size:18px; color:var(--ink-soft); line-height:1.65; flex:1; }
+  .mini-card .mc-note{ font-size:11.5px; color:var(--ink-faint); margin-top:auto; padding-top:9px; line-height:1.4; }
+  .tag-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; }
+  .tag-pill{ background:rgba(255,255,255,.9); border-radius:999px; padding:6px 14px; font-size:12px; font-weight:800; color:var(--ink-soft); box-shadow:var(--card-shadow); }
+
+  /* ---------- 데이터 테이블 (몬스터 예시) ---------- */
+  .data-table{ width:100%; border-collapse:collapse; background:var(--white); border-radius:16px; overflow:hidden; box-shadow:var(--card-shadow); font-size:13.5px; }
+  .data-table th{ background:var(--ink); color:#fff; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.3px; padding:11px 14px; text-align:left; }
+  .data-table td{ padding:10px 14px; color:var(--ink-soft); font-weight:700; border-bottom:1px solid rgba(27,43,58,.08); }
+  .data-table tr:nth-child(even) td{ background:rgba(31,155,224,.05); }
+
+  html.print-pdf .pill-tag, html.print-pdf .headline-hero, html.print-pdf .subline,
+  html.print-pdf .feature-card, html.print-pdf .step-card,
+  html.print-pdf .why-item, html.print-pdf .doc-card,
+  html.print-pdf .teaser-icon, html.print-pdf .teaser-question, html.print-pdf .teaser-caption,
+  html.print-pdf .break-eyebrow, html.print-pdf .break-hero, html.print-pdf .break-sub,
+  html.print-pdf .vs-card-tiger, html.print-pdf .vs-card-lion, html.print-pdf .vs-badge,
+  html.print-pdf .dict-card,
+  html.print-pdf .data-table tbody tr, html.print-pdf .p10-note, html.print-pdf .p10-proof-img img{
+    animation:none !important; opacity:1 !important; transform:none !important; clip-path:none !important;
+  }
+
+  @media screen and (max-width:900px){
+    .headline-hero{ font-size:52px !important; -webkit-text-stroke:5px var(--ink); }
+    .section-title{ font-size:24px !important; }
+    .step-cards{ grid-template-columns:1fr; }
+    .doc-columns{ flex-direction:column; }
+  }
+
+  @page{ size: landscape; margin:0; }
+  html.print-pdf .reveal .slides section,
+  html.print-pdf .slide-shell{ width:1280px !important; height:720px !important; }
+
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="index.html">← Course Home</a>
+
+<canvas id="cursorTrail"></canvas>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ Title ============ -->
+    <section>
+      <div class="slide-shell title-stage">
+        <div class="cloud" style="width:100px;height:58px; top:40px; left:6%; animation-duration:14s;"></div>
+        <div class="cloud" style="width:130px;height:72px; top:80px; left:55%; animation-duration:18s; animation-delay:-5s;"></div>
+
+        <div class="title-main">
+          <div class="title-copy">
+            <div class="pill-tag">🎮 DIGITAL CONTENTS DESIGN</div>
+            <h1 class="headline-hero">System Design<br>with DATA</h1>
+            <div class="subline">Capstone Game Engine · 8주차</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘의 흐름 ============ -->
+    <section>
+      <div class="slide-shell" data-page="01">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘은 <span class="emph">이렇게</span> 진행할게요.</h2>
+          <div style="flex:1; display:flex; align-items:center;">
+            <div class="step-cards" style="grid-template-columns:repeat(4,1fr); gap:20px;">
+              <div class="step-card" style="--c:var(--pink-dark);">
+                <div class="step-icon">⚖️</div>
+                <div class="step-label">PART 1 · 토론</div>
+                <div class="step-title">법 / 규칙</div>
+                <div class="step-desc">어떤 것들이 있었어요?<br>어떻게 해야 할까요?</div>
+              </div>
+              <div class="step-card" style="--c:var(--grass-dark);">
+                <div class="step-icon">🧭</div>
+                <div class="step-label">PART 2 · 기획</div>
+                <div class="step-title">디자인 종류</div>
+                <div class="step-desc">게임 · 시스템 · 컨텐츠.</div>
+              </div>
+              <div class="step-card" style="--c:var(--yellow-dark);">
+                <div class="step-icon">🗂️</div>
+                <div class="step-label">PART 3 · 기획</div>
+                <div class="step-title">데이터의 종류</div>
+                <div class="step-desc">정적 vs. 동적</div>
+              </div>
+              <div class="step-card" style="--c:var(--blue-dark);">
+                <div class="step-icon">⚙️</div>
+                <div class="step-label">PART 4 · 엔진</div>
+                <div class="step-title">데이터 다루기</div>
+                <div class="step-desc">엔진에서<br>직접 써볼까요.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 1 전환 (토론) ============ -->
+    <section>
+      <div class="slide-shell" data-page="02">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 1 · 토론</div>
+          <h2 class="break-hero">지난 주 예고했던,<br>그 <span class="emph">질문</span>부터 가볼까요?</h2>
+          <div class="break-sub">법. 이번에도 정답은 없어요. <span class="accent">자유롭게</span> 이야기 나눠봅시다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 토론 주제 (납득 법) ============ -->
+    <section>
+      <div class="slide-shell" data-page="03">
+        <div class="teaser-wrap">
+          <div class="teaser-icon" style="width:auto; height:auto;">
+            <span class="power-emoji" style="font-size:150px;">⚖️</span>
+          </div>
+          <div class="teaser-question">납득할 수 없는 <span class="emph">법</span>은 어떤 게 있어요?<br>그러면 어떻게 해야 하죠?</div>
+          <div class="teaser-caption mono">TODAY'S TALK · ICE BREAKING</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 연결 브릿지 (법의 두 종류) ============ -->
+    <section>
+      <div class="slide-shell" data-page="04">
+        <div class="break-body">
+          <div class="break-eyebrow">어때요?</div>
+          <h2 class="break-hero">법에도, <span class="emph">두 가지</span>가 있지 않아요?</h2>
+          <div class="break-sub">거의 안 바뀌는 <span class="accent">근본 규칙</span>과, 상황 따라 <span class="accent">바뀌는 것</span><br>게임 데이터도 똑같아요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 2 전환 (기획) ============ -->
+    <section>
+      <div class="slide-shell" data-page="05">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 2 · 기획</div>
+          <h2 class="break-hero"><span class="emph">게임 디자인</span>,<br>잠깐 다시 볼까요?</h2>
+          <div class="break-sub">전에 얘기했던 것들. 살짝 리마인드?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 시스템 디자인 vs 콘텐츠 디자인 ============ -->
+    <section>
+      <div class="slide-shell" data-page="06">
+        <div class="body-wrap">
+          <h2 class="section-title">게임 디자인</h2>
+          <div style="display:flex; gap:22px; margin-top:28px; flex:1;">
+            <div class="feature-card" style="flex:1; flex-direction:column; align-items:flex-start; border-top:6px solid var(--blue-dark); padding:26px 28px;">
+              <div class="feature-num mono" style="color:var(--blue-dark);">01</div>
+              <div class="feature-title" style="font-size:35px; margin-top:10px;">시스템 디자인</div>
+              <div class="feature-desc" style="font-size:17px; margin-top:6px;">게임 안의 규칙 · 매커니즘 · 논리적 구조 등을 설계하는 것. 게임이 동작하는 방식과, 플레이어와의 상호작용을 설계해요.<br><br><b>예) 전투 시스템 · 성장 시스템 · 경제 시스템</b></div>
+            </div>
+            <div class="feature-card" style="flex:1; flex-direction:column; align-items:flex-start; border-top:6px solid var(--pink-dark); padding:26px 28px;">
+              <div class="feature-num mono" style="color:var(--pink-dark);">02</div>
+              <div class="feature-title" style="font-size:35px; margin-top:10px;">콘텐츠 디자인</div>
+              <div class="feature-desc" style="font-size:17px; margin-top:6px;">게임 안에서 준비된 시스템을 기반으로, 플레이어가 경험할 구체적이고 세부적인 내용을 설계하는 것.<br><br><b>예) 전투 컨텐츠 · 성장 컨텐츠 · 경제 컨텐츠</b></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">시스템은 게임이 돌아가는 규칙과 틀을 만들고, 콘텐츠는 그 틀 위에 플레이어가 겪을 경험을 채워요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 같은 건물, 다른 시선 ============ -->
+    <section>
+      <div class="slide-shell house-reveal-slide" data-page="07">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title" style="text-align:center; align-self:center;">건물로 비유해보면!</h2>
+          <div style="text-align:center; font-size:12px; color:var(--ink-faint); margin-top:2px;">시스템은 건물이 서 있게 하는 골조와 설비를, 콘텐츠는 그 안에서 사람이 살고 느끼는 공간을 만들어요 — <span style="opacity:.8;">(클릭해서 하나씩 지어볼까요?)</span></div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:2px; min-height:0;">
+            <svg viewBox="0 0 1150 460" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; max-height:430px;">
+              <!-- ===== LEFT: 시스템 디자인 (blueprint, 바닥부터 세워짐) ===== -->
+              <g class="house-pic house-left">
+                <g fill="none" stroke="#0f7fc2">
+                  <polygon points="290,45 160,135 420,135" stroke-width="3" stroke-linejoin="round"/>
+                  <line x1="200" y1="90" x2="380" y2="90" stroke-width="2"/>
+                  <line x1="290" y1="45" x2="200" y2="90" stroke-width="2"/>
+                  <line x1="290" y1="45" x2="380" y2="90" stroke-width="2"/>
+                  <line x1="160" y1="135" x2="160" y2="405" stroke-width="3"/>
+                  <line x1="290" y1="135" x2="290" y2="405" stroke-width="2.5"/>
+                  <line x1="420" y1="135" x2="420" y2="405" stroke-width="3"/>
+                  <line x1="160" y1="135" x2="420" y2="135" stroke-width="3"/>
+                  <line x1="160" y1="225" x2="420" y2="225" stroke-width="2.5"/>
+                  <line x1="160" y1="315" x2="420" y2="315" stroke-width="2.5"/>
+                  <line x1="160" y1="405" x2="420" y2="405" stroke-width="3"/>
+                  <polyline points="210,405 255,315 210,225 255,135" stroke-width="2" stroke-dasharray="4 4"/>
+                  <line x1="375" y1="135" x2="375" y2="405" stroke="#1f9be0" stroke-width="2" stroke-dasharray="2 5"/>
+                  <rect x="140" y="405" width="300" height="25" stroke-width="3"/>
+                </g>
+                <g stroke="#0f7fc2" stroke-width="1.5">
+                  <line x1="150" y1="430" x2="170" y2="405"/>
+                  <line x1="190" y1="430" x2="210" y2="405"/>
+                  <line x1="230" y1="430" x2="250" y2="405"/>
+                  <line x1="270" y1="430" x2="290" y2="405"/>
+                  <line x1="310" y1="430" x2="330" y2="405"/>
+                  <line x1="350" y1="430" x2="370" y2="405"/>
+                  <line x1="390" y1="430" x2="410" y2="405"/>
+                </g>
+                <circle cx="375" cy="225" r="4" fill="#1f9be0"/>
+                <circle cx="375" cy="315" r="4" fill="#1f9be0"/>
+              </g>
+
+              <!-- ===== RIGHT: 콘텐츠 디자인 (colorful, 지붕부터 지어짐) ===== -->
+              <g class="house-pic house-right">
+                <polygon points="830,45 700,135 960,135" fill="#ffce3d" stroke="#f2a900" stroke-width="2"/>
+                <circle cx="750" cy="135" r="5" fill="#fff6d6" stroke="#f2a900" stroke-width="1.5"/>
+                <circle cx="830" cy="118" r="5" fill="#fff6d6" stroke="#f2a900" stroke-width="1.5"/>
+                <circle cx="910" cy="135" r="5" fill="#fff6d6" stroke="#f2a900" stroke-width="1.5"/>
+                <rect x="700" y="135" width="260" height="90" fill="#ffe3ef"/>
+                <rect x="700" y="225" width="260" height="90" fill="#bdeaff"/>
+                <rect x="700" y="315" width="260" height="90" fill="#eafce0"/>
+                <rect x="700" y="405" width="260" height="25" fill="#fff3cf"/>
+                <g stroke="#1b2b3a" stroke-width="1" opacity=".22">
+                  <line x1="830" y1="135" x2="830" y2="405"/>
+                  <line x1="700" y1="225" x2="960" y2="225"/>
+                  <line x1="700" y1="315" x2="960" y2="315"/>
+                </g>
+                <rect x="878" y="150" width="10" height="55" fill="#d94c8a"/>
+                <rect x="890" y="160" width="10" height="45" fill="#f2a900"/>
+                <rect x="902" y="155" width="10" height="50" fill="#1f9be0"/>
+                <rect x="730" y="270" rx="8" ry="8" width="70" height="30" fill="#ff6fae"/>
+                <circle cx="820" cy="275" r="12" fill="#6bc55a"/>
+                <polygon points="735,370 748,370 741,350" fill="#6bc55a"/>
+                <rect x="737" y="370" width="8" height="10" fill="#9a6b3e"/>
+                <circle cx="905" cy="365" r="9" fill="#ffce3d"/>
+                <line x1="905" y1="374" x2="905" y2="400" stroke="#b9820a" stroke-width="2"/>
+              </g>
+
+              <!-- ===== LEFT CAPTION: 타이틀 + 라벨(스케일 없이 페이드만) ===== -->
+              <g class="house-caption house-left" font-family="'Nunito', sans-serif">
+                <text x="290" y="18" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#0f7fc2">시스템 디자인</text>
+                <g>
+                  <line x1="134" y1="90" x2="158" y2="90" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="160" cy="90" r="5" fill="#0f7fc2"/>
+                  <text x="130" y="86" text-anchor="end" font-weight="800" font-size="17" fill="#1b2b3a">지붕 트러스</text>
+                  <text x="130" y="101" text-anchor="end" font-size="13" fill="rgba(27,43,58,.55)">전체 하중 분배 = 밸런스</text>
+                </g>
+                <g>
+                  <line x1="134" y1="180" x2="158" y2="180" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="160" cy="180" r="5" fill="#0f7fc2"/>
+                  <text x="130" y="176" text-anchor="end" font-weight="800" font-size="17" fill="#1b2b3a">기둥 · 보 · 슬래브</text>
+                  <text x="130" y="191" text-anchor="end" font-size="13" fill="rgba(27,43,58,.55)">규칙과 공식</text>
+                </g>
+                <g>
+                  <line x1="134" y1="270" x2="158" y2="270" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="160" cy="270" r="5" fill="#0f7fc2"/>
+                  <text x="130" y="266" text-anchor="end" font-weight="800" font-size="17" fill="#1b2b3a">배관 · 전기</text>
+                  <text x="130" y="281" text-anchor="end" font-size="13" fill="rgba(27,43,58,.55)">재화 · 데이터 흐름(경제)</text>
+                </g>
+                <g>
+                  <line x1="134" y1="360" x2="158" y2="360" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="160" cy="360" r="5" fill="#0f7fc2"/>
+                  <text x="130" y="356" text-anchor="end" font-weight="800" font-size="17" fill="#1b2b3a">계단</text>
+                  <text x="130" y="371" text-anchor="end" font-size="13" fill="rgba(27,43,58,.55)">성장 · 진행 구조</text>
+                </g>
+                <g>
+                  <line x1="134" y1="417" x2="158" y2="417" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="160" cy="417" r="5" fill="#0f7fc2"/>
+                  <text x="130" y="413" text-anchor="end" font-weight="800" font-size="17" fill="#1b2b3a">기초</text>
+                  <text x="130" y="428" text-anchor="end" font-size="13" fill="rgba(27,43,58,.55)">핵심 루프</text>
+                </g>
+              </g>
+
+              <!-- ===== RIGHT CAPTION ===== -->
+              <g class="house-caption house-right" font-family="'Nunito', sans-serif">
+                <text x="830" y="18" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#d94c8a">콘텐츠 디자인</text>
+                <g>
+                  <line x1="962" y1="90" x2="986" y2="90" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="960" cy="90" r="5" fill="#d94c8a"/>
+                  <text x="990" y="86" text-anchor="start" font-weight="800" font-size="17" fill="#1b2b3a">조명 · 장식</text>
+                  <text x="990" y="101" text-anchor="start" font-size="13" fill="rgba(27,43,58,.55)">분위기 · 연출</text>
+                </g>
+                <g>
+                  <line x1="962" y1="180" x2="986" y2="180" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="960" cy="180" r="5" fill="#d94c8a"/>
+                  <text x="990" y="176" text-anchor="start" font-weight="800" font-size="17" fill="#1b2b3a">방마다 다른 테마</text>
+                  <text x="990" y="191" text-anchor="start" font-size="13" fill="rgba(27,43,58,.55)">레벨 · 스테이지</text>
+                </g>
+                <g>
+                  <line x1="962" y1="270" x2="986" y2="270" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="960" cy="270" r="5" fill="#d94c8a"/>
+                  <text x="990" y="266" text-anchor="start" font-weight="800" font-size="17" fill="#1b2b3a">그림 · 책장</text>
+                  <text x="990" y="281" text-anchor="start" font-size="13" fill="rgba(27,43,58,.55)">스토리 · 세계관</text>
+                </g>
+                <g>
+                  <line x1="962" y1="360" x2="986" y2="360" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="960" cy="360" r="5" fill="#d94c8a"/>
+                  <text x="990" y="356" text-anchor="start" font-weight="800" font-size="17" fill="#1b2b3a">가구 · 소품 배치</text>
+                  <text x="990" y="371" text-anchor="start" font-size="13" fill="rgba(27,43,58,.55)">몬스터 · 아이템 배치</text>
+                </g>
+                <g>
+                  <line x1="962" y1="417" x2="986" y2="417" stroke="#3a5266" stroke-width="2" opacity=".55"/><circle cx="960" cy="417" r="5" fill="#d94c8a"/>
+                  <text x="990" y="413" text-anchor="start" font-weight="800" font-size="17" fill="#1b2b3a">인테리어 교체</text>
+                  <text x="990" y="428" text-anchor="start" font-size="13" fill="rgba(27,43,58,.55)">시즌 · 라이브 업데이트</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12px; color:var(--ink-faint);">골조는 무엇이 가능한지 정하고, 인테리어는 그 안에서 무엇을 느낄지 정해요 — 골조는 나중에 바꾸기 비싸고, 인테리어는 계속 바뀌어요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 시스템 디자인이 하는 일 ============ -->
+    <section>
+      <div class="slide-shell" data-page="08">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title" style="text-align:center; align-self:center;"><span class="emph">시스템 디자인</span>이 하는 일.</h2>
+          <div style="text-align:center; font-size:13px; color:var(--ink-faint); margin-top:2px;">게임이 어떻게 동작하는지, 규칙과 틀을 만들어요</div>
+          <div class="panel-2col">
+            <div class="design-panel" style="border-top:6px solid var(--blue-dark);">
+              <div class="mini-row">
+                <div class="mini-card">
+                  <div class="mc-title">전체 게임의 흐름</div>
+                  <svg viewBox="0 0 170 100" style="width:100%; height:180px; flex:0 0 auto;">
+                    <defs><marker id="flowArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3a5266"/></marker></defs>
+                    <path class="draw-path" pathLength="1" style="animation-delay:.5s;" d="M46,51 L60,51" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#flowArrow)"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:.9s;" d="M112,51 L126,51" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#flowArrow)"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:1.3s;" d="M146,64 Q87,95 27,64" fill="none" stroke="#d94c8a" stroke-width="2" marker-end="url(#flowArrow)"/>
+                    <text x="87" y="92" text-anchor="middle" font-size="8" fill="#d94c8a" font-weight="800">재도전</text>
+                    <g class="svg-pop" style="animation-delay:.1s;"><rect x="8" y="38" width="38" height="26" rx="8" fill="#3a5266"/><text x="27" y="55" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">시작</text></g>
+                    <g class="svg-pop" style="animation-delay:.3s;"><rect x="60" y="30" width="54" height="42" rx="10" fill="#1f9be0"/><text x="87" y="48" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">플레이</text><text x="87" y="62" text-anchor="middle" font-size="7.5" fill="#dbeeff">(핵심 루프)</text></g>
+                    <g class="svg-pop" style="animation-delay:.5s;"><rect x="126" y="38" width="36" height="26" rx="8" fill="#d94c8a"/><text x="144" y="55" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">종료</text></g>
+                  </svg>
+                  <div class="mc-note">시작 → 플레이 → 종료 → 재도전</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mc-title">성장 곡선</div>
+                  <svg viewBox="0 0 140 90" style="width:100%; height:180px; flex:0 0 auto;">
+                    <line x1="10" y1="80" x2="10" y2="10" stroke="rgba(27,43,58,.3)" stroke-width="1"/>
+                    <line x1="10" y1="80" x2="130" y2="80" stroke="rgba(27,43,58,.3)" stroke-width="1"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:.3s;" d="M10,78 C40,74 70,55 90,35 C105,20 115,12 130,8" stroke="#0f7fc2" stroke-width="2.5" fill="none"/>
+                    <text class="svg-pop" style="animation-delay:1.1s;" x="70" y="89" font-size="9" fill="rgba(27,43,58,.5)" text-anchor="middle">레벨 →</text>
+                  </svg>
+                  <div class="mc-note">필요 EXP = 100 · Lv^1.5</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mc-title">핵심 루프</div>
+                  <svg viewBox="0 0 150 150" style="width:180px; height:180px; flex:0 0 auto; align-self:center;">
+                    <defs><marker id="loopArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3a5266"/></marker></defs>
+                    <path class="draw-path" pathLength="1" style="animation-delay:.75s;" d="M90,30 Q118,42 118,60" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#loopArrow)"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:.95s;" d="M118,90 Q112,112 90,120" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#loopArrow)"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:1.15s;" d="M60,120 Q32,112 32,90" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#loopArrow)"/>
+                    <path class="draw-path" pathLength="1" style="animation-delay:1.35s;" d="M32,60 Q38,38 60,30" fill="none" stroke="#3a5266" stroke-width="2" marker-end="url(#loopArrow)"/>
+                    <g class="svg-pop" style="animation-delay:.1s;"><circle cx="75" cy="20" r="18" fill="#1f9be0"/><text x="75" y="24" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">전투</text></g>
+                    <g class="svg-pop" style="animation-delay:.28s;"><circle cx="130" cy="75" r="18" fill="#3ddc6a"/><text x="130" y="79" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">보상</text></g>
+                    <g class="svg-pop" style="animation-delay:.46s;"><circle cx="75" cy="130" r="18" fill="#ffce3d"/><text x="75" y="134" font-size="10" font-weight="800" fill="#1b2b3a" text-anchor="middle">성장</text></g>
+                    <g class="svg-pop" style="animation-delay:.64s;"><circle cx="20" cy="75" r="18" fill="#ff6fae"/><text x="20" y="79" font-size="9" font-weight="800" fill="#fff" text-anchor="middle">강한적</text></g>
+                  </svg>
+                  <div class="mc-note">→ 반복할 동기를 설계</div>
+                </div>
+              </div>
+              <div class="tag-row">
+                <span class="tag-pill">규칙</span><span class="tag-pill">공식</span><span class="tag-pill">밸런스</span><span class="tag-pill">경제</span><span class="tag-pill">성장</span><span class="tag-pill">상태 · 전이</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 전투 공식 ============ -->
+    <section>
+      <div class="slide-shell" data-page="09">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title" style="text-align:center; align-self:center;"><span class="emph">전투 공식</span>도, 시스템 디자인이 해요.</h2>
+          <div style="text-align:center; font-size:13px; color:var(--ink-faint); margin-top:2px;">숫자 하나도, 그냥 정하는 게 아니라 이렇게 쌓아 올려요</div>
+          <div class="doc-card" style="flex:1; margin-top:16px; display:flex; flex-direction:column; justify-content:center;">
+            <div class="mc-body" style="line-height:2.3;">
+              <div style="font-size:26px; color:#fff;"><b style="color:#ffce3d;">최종 피해량</b> = 피해량 × (1 + 피해량 증가 비율의 합) + 피해량 증가 값의 합</div>
+              <div style="font-size:23px; margin-left:40px; color:#dfe8ee;">↳ <b style="color:#9cdcfe;">피해량</b> = 최종 공격력 × 방어력 연계 상수 / (방어력 연계 상수 + 최종 방어력)</div>
+              <div style="font-size:20px; margin-left:80px; color:#b7c2cb;">↳ <b style="color:#9cdcfe;">최종 공격력</b> = 공격력 × (1 + 공격력 증가 비율의 합) + 공격력 증가 값의 합</div>
+              <div style="font-size:20px; margin-left:80px; color:#b7c2cb;">↳ <b style="color:#9cdcfe;">최종 방어력</b> = 방어력 × (1 + 방어력 증가 비율의 합) + 방어력 증가 값의 합</div>
+            </div>
+            <div class="intro-note" style="font-size:17px; color:#ffce3d; margin-top:50px;">→ 각 수치가, 자기만의 공식을 또 가져요<br>→ 공식도 데이터처럼, 계단식으로 쌓여요.<br>→ 가능하면, 상수들은 코드에 직접 기재하지 않도록!</div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 콘텐츠 디자인이 하는 일 ============ -->
+    <section>
+      <div class="slide-shell" data-page="10">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title" style="text-align:center; align-self:center;"><span class="emph">콘텐츠 디자인</span>이 하는 일.</h2>
+          <div style="text-align:center; font-size:13px; color:var(--ink-faint); margin-top:2px;">그 틀 위에서, 플레이어가 겪을 경험을 채워요.</div>
+          <div class="panel-2col">
+            <div class="design-panel" style="border-top:6px solid var(--pink-dark);">
+              <div class="mini-row">
+                <div class="mini-card">
+                  <div class="mc-title">레벨 · 숲 1-3</div>
+                  <svg viewBox="0 0 170 100" style="width:100%; height:150px; flex:0 0 auto;">
+                    <polyline class="draw-path" pathLength="1" style="animation-delay:.2s;" points="15,85 55,70 50,40 95,35 90,15 140,15" stroke="#3a5266" stroke-width="2" fill="none"/>
+                    <circle class="svg-pop" style="animation-delay:0s;" cx="15" cy="85" r="6" fill="#3ddc6a"/>
+                    <circle class="svg-pop" style="animation-delay:.45s;" cx="55" cy="70" r="5" fill="#d94c8a"/>
+                    <rect class="svg-pop" style="animation-delay:.65s;" x="45" y="34" width="10" height="10" fill="#f2a900"/>
+                    <circle class="svg-pop" style="animation-delay:.85s;" cx="90" cy="33" r="5" fill="#d94c8a"/>
+                    <g class="svg-pop" style="animation-delay:1.15s;">
+                      <rect x="120" y="3" width="32" height="26" rx="4" fill="none" stroke="#d94c8a" stroke-width="2"/>
+                      <text x="136" y="20" font-size="9" fill="#d94c8a" text-anchor="middle" font-weight="800">보스</text>
+                    </g>
+                  </svg>
+                  <div class="mc-note">길 · 적 · 보상의 배치와 리듬</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mc-title">퀘스트 · 잃어버린 도끼</div>
+                  <div class="mc-body"><b>NPC 나무꾼 한스</b><br>도끼를 숲에 두고 왔는데… 거기 고블린이 들끓어.<br><b>목표</b><br>숲 1-3에서 도끼 회수<br><b>보상</b><br>EXP 450 · 은화 30<br><b>연계</b><br>'숲의 주인' 퀘스트 해금</div>
+                  <div class="mc-note">→ 동기 · 맥락 · 감정을 부여</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mc-title">보스 연출 · 숲의 주인</div>
+                  <div class="mc-body"><b>등장</b><br>나무가 쓰러지며 컷신<br><b>페이즈 01.</b><br>덩굴 휘두르기<br><b>페이즈 02.</b><br>HP 50% 분노 · 졸개 소환<br><b>처치</b><br>숲이 밝아지고 보상</div>
+                  <div class="mc-note">→ 순간의 경험을 연출</div>
+                </div>
+              </div>
+              <div class="tag-row">
+                <span class="tag-pill">레벨</span><span class="tag-pill">퀘스트</span><span class="tag-pill">스토리</span><span class="tag-pill">몬스터 배치</span><span class="tag-pill">대사</span><span class="tag-pill">연출</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 같은 데이터 테이블, 다른 책임 ============ -->
+    <section>
+      <div class="slide-shell" data-page="11">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">게임으로 보면, 같은 <span class="emph">데이터</span>, 다른 책임.</h2>
+          <div style="overflow-x:auto; margin-top:18px;">
+            <table class="data-table">
+              <thead>
+                <tr><th>ID</th><th>이름</th><th>레벨</th><th>HP</th><th>ATK</th><th>DEF</th><th>드랍 테이블</th><th>등장 위치</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1001</td><td>고블린</td><td>3</td><td>120</td><td>18</td><td>5</td><td>숲_일반</td><td>숲 1-1 ~ 1-3</td></tr>
+                <tr><td>1002</td><td>오크 전사</td><td>7</td><td>340</td><td>42</td><td>20</td><td>숲_정예</td><td>숲 2-1</td></tr>
+                <tr><td>1099</td><td>숲의 주인</td><td>15</td><td>900</td><td>35</td><td>15</td><td>보스_숲</td><td>숲 1-3 보스방</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="p10-sys-con" style="display:flex; gap:20px; margin-top:20px;">
+            <div class="feature-card" style="flex:1;"><div class="feature-num mono" style="color:var(--blue-dark);">SYS</div>
+              <div><div class="feature-title" style="color:var(--blue-dark);">시스템이 정의</div>
+              <div class="feature-desc">어떤 열(컬럼)이 있고, 값은 어떤 공식 · 범위를 따르는가.</div></div>
+            </div>
+            <div class="feature-card" style="flex:1;"><div class="feature-num mono" style="color:var(--pink-dark);">CON</div>
+              <div><div class="feature-title" style="color:var(--pink-dark);">콘텐츠가 채움</div>
+              <div class="feature-desc">어떤 몬스터를, 어디에, 얼마나 배치하는가.</div></div>
+            </div>
+          </div>
+          <div class="intro-note p10-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:14px;">결국 이 "같은 테이블"을 누가 어떻게 쓰는지가 다를 뿐 — 둘 다 데이터로 만나요.</div>
+          <div class="p10-proof-img" style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:12px; min-height:0;">
+            <img src="Midias/w8/10-1.png" alt="실제 무기 데이터 테이블 예시" style="max-width:100%; max-height:100%; border-radius:14px; box-shadow:var(--card-shadow-lg); object-fit:contain;">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 흔한 오해 (+ 클릭 팝업: 데이터 테이블/데이터베이스) ============ -->
+    <section>
+      <div class="slide-shell popup-reveal-slide" data-page="12">
+        <div class="body-wrap">
+          <h2 class="section-title">시스템 디자인과 데이터, 흔한 <span class="emph">오해</span>들.</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">시스템 디자인 ≥ 데이터 테이블</div>
+              <div class="feature-desc">데이터 테이블은, 시스템 디자인이 하는 일 중 하나일 뿐이에요. 안 쓰는 경우도 있고, 다른 파트(서버 등)에서도 써요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">"설계, 안 해도 되는 거 아니야?"</div>
+              <div class="feature-desc">조직 성격에 따라 다를 뿐이에요. 시스템 디자이너 · 테크니컬 디자이너 · 혹은 서버 프로그래머가. 역할을 나눠 맡기도 해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">데이터 테이블 ≠ 데이터베이스</div>
+              <div class="feature-desc">이름은 비슷해도, 전혀 다른 거예요. <b>클릭해서 바로 볼까요?</b></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="content-popup">
+          <div class="content-popup-inner">
+            <h2 class="section-title" style="text-align:center !important; width:100%; display:block; color:#fff !important;">이런 차이가 있어요.</h2>
+            <div style="display:flex; flex-direction:column; gap:16px; margin-top:18px;">
+              <div style="display:flex; gap:22px;">
+                <div class="dict-card" style="max-width:none; flex:1; padding:22px 26px; border-top:6px solid var(--blue-dark);">
+                  <div class="dict-head"><span class="dict-word" style="font-size:22px;">Datatable</span></div>
+                  <div class="dict-body" style="font-size:13.5px;">게임에서 <b>사용</b>되는 대량의 다양한 <span style="color:var(--blue-dark); font-weight:800;">정적</span> 정보를, 구조화하여 <b>포함</b>하는 데이터 형식.</div>
+                </div>
+                <div class="dict-card" style="max-width:none; flex:1; padding:22px 26px; border-top:6px solid var(--pink-dark);">
+                  <div class="dict-head"><span class="dict-word" style="font-size:22px;">Database</span></div>
+                  <div class="dict-body" style="font-size:13.5px;">게임에서 <b>생성</b>되는 대량의 다양한 <span style="color:var(--pink-dark); font-weight:800;">동적</span> 정보를, 구조화하여 <b>저장</b>하는 공간이나, 시스템.</div>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:center;">
+                <div class="pill-tag" style="background:var(--ink); color:#fff; box-shadow:0 4px 0 rgba(0,0,0,.3); font-size:14px;">※ 데이터는 게임 제작에 통용되는, 하나의 언어에요!!</div>
+              </div>
+              <div style="display:flex; gap:22px;">
+                <div class="feature-card" style="flex:1; flex-direction:column; align-items:flex-start; border-top:6px solid var(--blue-dark); padding:18px 22px;">
+                  <div class="feature-title" style="font-size:15px;">정적 데이터 (Datatable)</div>
+                  <div class="feature-desc" style="margin-top:4px; font-size:12.5px;">개발자가 미리 정해두는 것. 게임을 켜도, 안 바뀌어요.<br><b>예) 무기 스탯 · 스테이지 정보 · 아이템 테이블</b></div>
+                </div>
+                <div class="feature-card" style="flex:1; flex-direction:column; align-items:flex-start; border-top:6px solid var(--pink-dark); padding:18px 22px;">
+                  <div class="feature-title" style="font-size:15px;">동적 데이터 (Database)</div>
+                  <div class="feature-desc" style="margin-top:4px; font-size:12.5px;">플레이어가 플레이하면서 만들어내는 것. 계속 바뀌어요.<br><b>예) 캐릭터 레벨 · 인벤토리 · 점수</b></div>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:center; font-size:11.5px; color:rgba(255,255,255,.55); margin-top:14px;">(다시 클릭하면 닫혀요)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 4 전환 (엔진) ============ -->
+    <section>
+      <div class="slide-shell" data-page="13">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 4 · 엔진</div>
+          <h2 class="break-hero">그럼, 엔진에서는<br>이 둘을 <span class="emph">어떻게</span> 다룰까요?</h2>
+          <div class="break-sub">정적은 정적답게, 동적은 동적답게 — <span class="accent">서로 다른 도구</span>를 써요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 쉬는시간 ============ -->
+    <section class="plain-white">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
+        <img src="Midias/letswrapituphere.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
+      </div>
+    </section>
+
+    <!-- ============ 정적 데이터 처리 도구 ============ -->
+    <section>
+      <div class="slide-shell" data-page="14">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">정적</span> 데이터, 이렇게 다뤄요</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">ScriptableObject</div>
+              <div class="feature-desc">유니티 안에서, 에셋 형태로 직접 만들어두는 데이터예요. Inspector에서 바로 값을 채워 넣어요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">CSV (Comma-Separated Values)</div>
+              <div class="feature-desc">표 형태로 정리해서, 대량의 데이터를 엑셀처럼 한 번에 관리해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">..ML (... Markup Language)</div>
+              <div class="feature-desc">조금은 복잡하지만 스키마를 포함하면 안정적으로 사용할 수 있는 언어에요.<br>XML · YML 등 UNITY 도 YAML 을 사용해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">JSON</div>
+              <div class="feature-desc">구조화된 텍스트 형식이에요. 다른 툴 · 서버와도 쉽게 주고받을 수 있어요.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 동적 데이터 처리 도구 ============ -->
+    <section>
+      <div class="slide-shell" data-page="15">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">동적</span> 데이터, 이렇게 다뤄요</h2>
+          <div class="obj-grid">
+            <div class="feature-card"><div class="feature-num mono">01</div>
+              <div><div class="feature-title">Memory</div>
+              <div class="feature-desc">플레이어의 기기 안에, 여러 데이터를 휘발성으로 저장해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">02</div>
+              <div><div class="feature-title">PlayerPrefs</div>
+              <div class="feature-desc">이 것도 플레이어의 기기 안에, 간단한 값을 바로바로 저장해요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">03</div>
+              <div><div class="feature-title">Redis</div>
+              <div class="feature-desc">서버에서, 빠르게 읽고 쓰는 캐시 · 세션 저장소예요.</div></div>
+            </div>
+            <div class="feature-card"><div class="feature-num mono">04</div>
+              <div><div class="feature-title">DB (Database)</div>
+              <div class="feature-desc">서버에서, 오래오래 보관해야 하는 데이터를 저장해요.</div></div>
+            </div>
+          </div>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:14px;">같은 "데이터"지만, 정적과 동적은 다루는 도구도 방식도 완전히 달라요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 같은 캐릭터, 데이터만 바꿔 끼우기 ============ -->
+    <section>
+      <div class="slide-shell" data-page="16">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">같은 캐릭터, <span class="emph">다섯 가지</span>로 비교해봐요</h2>
+          <div class="intro-note" style="font-size:13px; color:var(--ink-faint); margin-top:4px;">7주차 호랑이 · 사자 FSM 그대로예요. <code>Character</code>에 구멍 하나만 뚫어뒀어요.</div>
+          <div class="doc-card" style="flex:1; margin-top:14px;">
+            <div class="doc-title" style="font-size:24px;">Character <span class="tag">① 직접 스크립트에 변수 할당</span></div>
+            <div class="doc-code" style="font-size:14px; line-height:1.7;"><span class="code-kw">protected virtual void</span> <span class="code-fn">LoadExternalStats</span>() { }
+<span class="code-cm">// 비워두면 — Inspector에 직접 써넣은 값 그대로 써요 (지금까지 하던 방식)</span></div>
+            <div class="doc-section" style="margin-top:18px;">
+              <div class="d-label">그리고, 나머지 네 가지는 전부 이 클래스 하나만 오버라이드해서</div>
+              <div class="doc-code" style="font-size:14px; line-height:1.7;"><span class="code-type">CharacterFromScriptableObject</span> : Character <span class="code-cm">// ② 스크립터블 오브젝트 로드</span>
+<span class="code-type">CharacterFromCSV</span> : Character <span class="code-cm">// ③ CSV 로드</span>
+<span class="code-type">CharacterFromXML</span> : Character <span class="code-cm">// ④ XML 로드</span>
+<span class="code-type">CharacterFromJSON</span> : Character <span class="code-cm">// ⑤ JSON 로드</span>
+<span class="code-cm">// 각자, LoadExternalStats()만 오버라이드해서</span>
+<span class="code-cm">// 자기 소스에서 값을 읽어와 SetStats(...)를 불러요</span></div>
+            </div>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:12px;">호랑이 · 사자 모델도, FSM 상태도, 전투 로직도 전부 그대로예요 — <b>바뀌는 건 "스탯이 어디서 오는가" 한 곳</b>뿐이에요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 다섯 가지, 이런 차이가 있어요 ============ -->
+    <section>
+      <div class="slide-shell" data-page="17">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title">다섯 가지, <span class="emph">이런 차이</span>가 있어요</h2>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; margin-top:2px; min-height:0;">
+            <svg viewBox="0 0 1150 520" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; max-height:460px;">
+              <defs>
+                <marker id="p17Arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#1b2b3a"/>
+                </marker>
+              </defs>
+
+              <!-- 묶음 배경존 (먼저 그려서, 카드들이 그 위에 올라가게) -->
+              <rect x="10" y="40" width="290" height="440" rx="26" fill="rgba(27,43,58,.045)" stroke="rgba(27,43,58,.2)" stroke-width="2" stroke-dasharray="6 6"/>
+              <rect x="850" y="10" width="290" height="500" rx="26" fill="rgba(27,43,58,.045)" stroke="rgba(27,43,58,.2)" stroke-width="2" stroke-dasharray="6 6"/>
+
+              <!-- connector lines (카드/허브가 끝점을 덮게, 먼저 그림) -->
+              <g stroke="#1b2b3a" stroke-width="2.5" opacity=".4" marker-end="url(#p17Arrow)">
+                <line x1="280" y1="155" x2="513" y2="262"/>
+                <line x1="280" y1="395" x2="512" y2="297"/>
+                <line x1="870" y1="120" x2="636" y2="257"/>
+                <line x1="870" y1="280" x2="640" y2="280"/>
+                <line x1="870" y1="440" x2="636" y2="303"/>
+              </g>
+
+              <!-- 허브: Character.SetStats() -->
+              <text x="575" y="196" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="19" fill="#1b2b3a">Character</text>
+              <circle cx="575" cy="280" r="70" fill="#1b2b3a"/>
+              <text x="575" y="276" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="17" fill="#fff">SetStats</text>
+              <text x="575" y="297" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="13" fill="#ffce3d">(hp, dmg, ...)</text>
+              <text x="575" y="375" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="14" fill="rgba(27,43,58,.6)">다섯 다, 결국 여기로 모여요</text>
+
+              <!-- 왼쪽 묶음: 에디터 안에서 -->
+              <text x="155" y="72" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="16" fill="#3a5266">에디터 안에서 · 재빌드 필요</text>
+              <g font-family="'Nunito', sans-serif">
+                <rect x="30" y="90" width="250" height="130" rx="16" fill="#fff" stroke="#3a5266" stroke-width="2.5"/>
+                <text x="46" y="122" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#1b2b3a">📝 ① 직접 할당</text>
+                <text x="46" y="146" font-size="13" fill="rgba(27,43,58,.6)">프리팹 Inspector</text>
+                <text x="46" y="172" font-size="13.5" fill="#1fb852">👍 제일 간단해요</text>
+                <text x="46" y="196" font-size="13.5" fill="#d94c8a">👎 값 하나 바꿔도 재빌드</text>
+
+                <rect x="30" y="330" width="250" height="130" rx="16" fill="#fff" stroke="#0f7fc2" stroke-width="2.5"/>
+                <text x="46" y="362" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#1b2b3a">🧩 ② Scriptable Object</text>
+                <text x="46" y="386" font-size="13" fill="rgba(27,43,58,.6)">유니티 에셋(.asset)</text>
+                <text x="46" y="412" font-size="13.5" fill="#1fb852">👍 기획자가 Inspector서 수정</text>
+                <text x="46" y="436" font-size="13.5" fill="#d94c8a">👎 이것도 재빌드는 필요</text>
+              </g>
+
+              <!-- 오른쪽 묶음: 텍스트 파일로 -->
+              <text x="995" y="42" text-anchor="middle" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="16" fill="#3a5266">텍스트 파일로 · 빌드 없이 교체</text>
+              <g font-family="'Nunito', sans-serif">
+                <rect x="870" y="55" width="250" height="130" rx="16" fill="#fff" stroke="#4a9e3d" stroke-width="2.5"/>
+                <text x="886" y="87" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#1b2b3a">📊 ③ CSV</text>
+                <text x="886" y="111" font-size="13" fill="rgba(27,43,58,.6)">텍스트 파일(표)</text>
+                <text x="886" y="137" font-size="13.5" fill="#1fb852">👍 엑셀처럼 대량 관리</text>
+                <text x="886" y="161" font-size="13.5" fill="#d94c8a">👎 파싱 로직을 직접 구현</text>
+
+                <rect x="870" y="215" width="250" height="130" rx="16" fill="#fff" stroke="#d94c8a" stroke-width="2.5"/>
+                <text x="886" y="247" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#1b2b3a">🏷️ ④ ..ML</text>
+                <text x="886" y="271" font-size="13" fill="rgba(27,43,58,.6)">텍스트 파일(태그)</text>
+                <text x="886" y="297" font-size="13.5" fill="#1fb852">👍 스키마로 형식 강제</text>
+                <text x="886" y="321" font-size="13.5" fill="#d94c8a">👎 장황하고 무거워요</text>
+
+                <rect x="870" y="375" width="250" height="130" rx="16" fill="#fff" stroke="#f2a900" stroke-width="2.5"/>
+                <text x="886" y="407" font-family="'Baloo 2', sans-serif" font-weight="800" font-size="18" fill="#1b2b3a">{ } ⑤ JSON</text>
+                <text x="886" y="431" font-size="13" fill="rgba(27,43,58,.6)">텍스트 파일(키-값)</text>
+                <text x="886" y="457" font-size="13.5" fill="#1fb852">👍 가볍고 서버 · 웹과 호환</text>
+                <text x="886" y="481" font-size="13.5" fill="#d94c8a">👎 대용량엔 좀 약해요</text>
+              </g>
+            </svg>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint);">다섯 다, 결과(호랑이·사자가 싸우는 것)는 완전히 똑같아요 — <b>데이터를 "어디에 두고, 누가 쉽게 고칠 수 있는가"</b>만 달라요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ② ScriptableObject 자세히 ============ -->
+    <section>
+      <div class="slide-shell" data-page="18">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">ScriptableObject</span> 버전</h2>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">유니티 에셋 그 자체예요. 코드 없이, 기획자가 Inspector에서 값만 바꿔도 돼요. <span class="mono">PlayFSM_SO</span></div>
+          <div class="doc-card" style="flex:1; margin-top:12px;">
+            <div class="doc-columns" style="margin-top:0;">
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">실제 에셋 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">Inspector</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:10px;">
+                  <img src="Midias/w8/19-2.png" alt="TigerStats.asset Inspector" style="max-height:190px; width:auto; max-width:100%; border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.35);">
+                  <img src="Midias/w8/19-1.png" alt="LionStats.asset Inspector" style="max-height:190px; width:auto; max-width:100%; border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.35);">
+                </div>
+              </div>
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">읽는 코드 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">CharacterFromScriptableObject.cs</span></div>
+                <div class="doc-code" style="font-size:14px; line-height:1.75; margin-left:0; margin-top:8px;"><span class="code-kw">public class</span> <span class="code-type">CharacterStatsSO</span> : ScriptableObject
+{
+    <span class="code-kw">public float</span> hp, bulletDamage, bulletAngle;
+    <span class="code-kw">public float</span> moveSpeedNormal, moveSpeedCombat;
+}
+
+[SerializeField] <span class="code-kw">private</span> CharacterStatsSO _statsAsset;
+
+<span class="code-kw">protected override void</span> <span class="code-fn">LoadExternalStats</span>()
+{
+    SetStats(
+        _statsAsset.hp,
+        _statsAsset.bulletDamage,
+        _statsAsset.bulletAngle,
+        _statsAsset.moveSpeedNormal,
+        _statsAsset.moveSpeedCombat
+    );
+}</div>
+              </div>
+            </div>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:10px;">Tiger_SO / Lion_SO 프리팹의 Inspector에, 이 에셋을 그냥 드래그해서 끼워뒀어요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ③ CSV 자세히 ============ -->
+    <section>
+      <div class="slide-shell" data-page="19">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">CSV</span> 버전</h2>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">엑셀처럼 표로 관리 — 대량의 데이터를 줄 단위로 읽어요. <span class="mono">PlayFSM_CSV</span></div>
+          <div class="doc-card" style="flex:1; margin-top:12px; display:flex; flex-direction:column;">
+            <div>
+              <div class="d-label" style="color:#9cdcfe; font-size:16px;">실제 파일 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">CharacterStats.csv</span></div>
+              <div style="display:flex; justify-content:center; margin-top:6px;">
+                <table class="data-table" style="width:auto; min-width:60%; font-size:20px;">
+                  <thead>
+                    <tr><th>name</th><th>hp</th><th>bulletDamage</th><th>bulletAngle</th><th>moveSpeedNormal</th><th>moveSpeedCombat</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Tiger</td><td>80</td><td>15</td><td>5</td><td>3.5</td><td>2</td></tr>
+                    <tr><td>Lion</td><td>120</td><td>10</td><td>15</td><td>2.5</td><td>1.2</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="d-label" style="color:#9cdcfe; font-size:16px;">읽는 코드 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">CharacterFromCSV.cs</span></div>
+              <div class="doc-code" style="font-size:12px; line-height:1.42; margin-left:0; margin-top:6px;">[SerializeField] <span class="code-kw">private string</span> _characterKey = <span class="code-str">"Tiger"</span>;
+[SerializeField] <span class="code-kw">private</span> TextAsset _csvFile;
+
+<span class="code-kw">protected override void</span> <span class="code-fn">LoadExternalStats</span>()
+{
+    <span class="code-kw">string</span>[] lines = _csvFile.text.Split(<span class="code-str">'\n'</span>);
+    <span class="code-kw">for</span> (<span class="code-kw">int</span> i = 1; i &lt; lines.Length; i++) <span class="code-cm">// 헤더는 건너뜀</span>
+    {
+        <span class="code-kw">string</span>[] cols = lines[i].Trim().Split(<span class="code-str">','</span>);
+        <span class="code-kw">if</span> (cols[0] != _characterKey) <span class="code-kw">continue</span>;
+
+        SetStats(<span class="code-fn">float.Parse</span>(cols[1]), <span class="code-fn">float.Parse</span>(cols[2]), <span class="code-fn">float.Parse</span>(cols[3]), <span class="code-fn">float.Parse</span>(cols[4]), <span class="code-fn">float.Parse</span>(cols[5]));
+        <span class="code-kw">return</span>;
+    }
+}</div>
+            </div>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:10px;">콤마(,)로 쪼개고, 0번째 칸(이름)이 _characterKey랑 같은 줄을 찾아요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ④ XML 자세히 ============ -->
+    <section>
+      <div class="slide-shell" data-page="20">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">XML</span> 버전</h2>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">태그로 구조를 감싸요 — 스키마로 형식을 강제하기 좋아요. <span class="mono">PlayFSM_XML</span></div>
+          <div class="doc-card" style="flex:1; margin-top:12px;">
+            <div class="doc-columns" style="margin-top:0;">
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">실제 파일</div>
+                <div class="doc-code" style="font-size:12px; line-height:1.5; margin-left:0; margin-top:8px;"><span class="code-cm">Resources/Data/CharacterStats.xml</span>
+<span style="color:#808080">&lt;</span><span style="color:#569cd6">CharacterStatsList</span><span style="color:#808080">&gt;</span>
+  <span style="color:#808080">&lt;</span><span style="color:#569cd6">CharacterStats</span> <span style="color:#9cdcfe">name</span><span style="color:#d4d4d4">=</span><span class="code-str">"Tiger"</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">hp</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">80</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">hp</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">bulletDamage</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">15</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">bulletDamage</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">bulletAngle</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">5</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">bulletAngle</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">moveSpeedNormal</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">3.5</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">moveSpeedNormal</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">moveSpeedCombat</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">2</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">moveSpeedCombat</span><span style="color:#808080">&gt;</span>
+  <span style="color:#808080">&lt;/</span><span style="color:#569cd6">CharacterStats</span><span style="color:#808080">&gt;</span>
+  <span style="color:#808080">&lt;</span><span style="color:#569cd6">CharacterStats</span> <span style="color:#9cdcfe">name</span><span style="color:#d4d4d4">=</span><span class="code-str">"Lion"</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">hp</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">120</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">hp</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">bulletDamage</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">10</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">bulletDamage</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">bulletAngle</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">15</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">bulletAngle</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">moveSpeedNormal</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">2.5</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">moveSpeedNormal</span><span style="color:#808080">&gt;</span>
+    <span style="color:#808080">&lt;</span><span style="color:#569cd6">moveSpeedCombat</span><span style="color:#808080">&gt;</span><span style="color:#b5cea8">1.2</span><span style="color:#808080">&lt;/</span><span style="color:#569cd6">moveSpeedCombat</span><span style="color:#808080">&gt;</span>
+  <span style="color:#808080">&lt;/</span><span style="color:#569cd6">CharacterStats</span><span style="color:#808080">&gt;</span>
+<span style="color:#808080">&lt;/</span><span style="color:#569cd6">CharacterStatsList</span><span style="color:#808080">&gt;</span></div>
+              </div>
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">읽는 코드 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">CharacterFromXML.cs</span></div>
+                <div class="doc-code" style="font-size:13.5px; line-height:1.75; margin-left:0; margin-top:8px;">[SerializeField] <span class="code-kw">private string</span> _characterKey = <span class="code-str">"Tiger"</span>;
+[SerializeField] <span class="code-kw">private</span> TextAsset _xmlFile;
+
+<span class="code-kw">protected override void</span> <span class="code-fn">LoadExternalStats</span>()
+{
+    XDocument doc = XDocument.<span class="code-fn">Parse</span>(_xmlFile.text);
+    <span class="code-kw">var</span> node = doc.Root.Elements(<span class="code-str">"CharacterStats"</span>)
+        .FirstOrDefault(e =&gt;
+            (<span class="code-kw">string</span>)e.Attribute(<span class="code-str">"name"</span>) == _characterKey);
+
+    SetStats(
+        (<span class="code-kw">float</span>)node.Element(<span class="code-str">"hp"</span>),
+        (<span class="code-kw">float</span>)node.Element(<span class="code-str">"bulletDamage"</span>),
+        (<span class="code-kw">float</span>)node.Element(<span class="code-str">"bulletAngle"</span>),
+        (<span class="code-kw">float</span>)node.Element(<span class="code-str">"moveSpeedNormal"</span>),
+        (<span class="code-kw">float</span>)node.Element(<span class="code-str">"moveSpeedCombat"</span>)
+    );
+}</div>
+              </div>
+            </div>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:10px;"><span class="mono">System.Xml.Linq</span>의 XDocument로, name 속성이 일치하는 노드 하나를 찾아요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ⑤ JSON 자세히 ============ -->
+    <section>
+      <div class="slide-shell" data-page="21">
+        <div class="body-wrap" style="flex:1; display:flex; flex-direction:column;">
+          <h2 class="section-title"><span class="emph">JSON</span> 버전</h2>
+          <div class="intro-note" style="font-size:12.5px; color:var(--ink-faint); margin-top:2px;">가장 가볍고 범용적 — 서버 · 웹과도 그대로 주고받아요. <span class="mono">PlayFSM_JSON</span></div>
+          <div class="doc-card" style="flex:1; margin-top:12px;">
+            <div class="doc-columns" style="margin-top:0;">
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">실제 파일</div>
+                <div class="doc-code" style="font-size:11.5px; line-height:1.42; margin-left:0; margin-top:8px;"><span class="code-cm">Resources/Data/CharacterStats.json</span>
+<span style="color:#d4d4d4">{</span>
+  <span style="color:#9cdcfe">"list"</span><span style="color:#d4d4d4">: [</span>
+    <span style="color:#d4d4d4">{</span>
+      <span style="color:#9cdcfe">"name"</span><span style="color:#d4d4d4">: </span><span class="code-str">"Tiger"</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"hp"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">80</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"bulletDamage"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">15</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"bulletAngle"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">5</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"moveSpeedNormal"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">3.5</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"moveSpeedCombat"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">2</span>
+    <span style="color:#d4d4d4">},</span>
+    <span style="color:#d4d4d4">{</span>
+      <span style="color:#9cdcfe">"name"</span><span style="color:#d4d4d4">: </span><span class="code-str">"Lion"</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"hp"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">120</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"bulletDamage"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">10</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"bulletAngle"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">15</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"moveSpeedNormal"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">2.5</span><span style="color:#d4d4d4">,</span>
+      <span style="color:#9cdcfe">"moveSpeedCombat"</span><span style="color:#d4d4d4">: </span><span style="color:#b5cea8">1.2</span>
+    <span style="color:#d4d4d4">}</span>
+  <span style="color:#d4d4d4">]</span>
+<span style="color:#d4d4d4">}</span></div>
+              </div>
+              <div style="flex:1;">
+                <div class="d-label" style="color:#9cdcfe; font-size:16px;">읽는 코드 <span style="font-size:12px; color:#dfe8ee; font-weight:600;">CharacterFromJSON.cs</span></div>
+                <div class="doc-code" style="font-size:13.5px; line-height:1.75; margin-left:0; margin-top:8px;">[SerializeField] <span class="code-kw">private string</span> _characterKey = <span class="code-str">"Tiger"</span>;
+[SerializeField] <span class="code-kw">private</span> TextAsset _jsonFile;
+<!--span class="code-cm">// JsonUtility는 최상위 배열을 못 읽어서</span>
+<span class="code-cm">// { "list": [...] }로 한 번 감싸요</span-->
+<span class="code-kw">protected override void</span> <span class="code-fn">LoadExternalStats</span>()
+{
+    <span class="code-kw">var</span> data = JsonUtility
+        .FromJson&lt;CharacterStatsJsonList&gt;(_jsonFile.text);
+
+    <span class="code-kw">foreach</span> (<span class="code-kw">var</span> entry <span class="code-kw">in</span> data.list)
+    {
+        <span class="code-kw">if</span> (entry.name != _characterKey) <span class="code-kw">continue</span>;
+        SetStats(entry.hp, entry.bulletDamage, entry.bulletAngle,
+            entry.moveSpeedNormal, entry.moveSpeedCombat);
+        <span class="code-kw">return</span>;
+    }
+}</div>
+              </div>
+            </div>
+          </div>
+          <div class="intro-note" style="text-align:center; font-size:12.5px; color:var(--ink-faint); margin-top:10px;">원래 PlayFSM부터 PlayFSM_SO · _CSV · _XML · _JSON까지, 씬 5개 다 열어서 똑같이 돌아가는지 비교해볼까요?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 오늘 정리 ============ -->
+    <section>
+      <div class="slide-shell" data-page="22">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘, <span class="emph">이 것들</span>을 기억해요.</h2>
+          <div class="why-list" style="margin-top:24px;">
+            <div class="why-item"><span class="check">✓</span>데이터 설계 등의 작업은 시스템 디자인이 하는 일 중 하나일 뿐이에요.</div>
+            <div class="why-item"><span class="check">✓</span>데이터는 게임 제작에서 통용되는 하나의 언어예요.</div>
+            <div class="why-item"><span class="check">✓</span>정적 데이터 ( 테이블 등 ) 와 동적 데이터 ( 데이터 베이스 등) 으로 구분해요.</div>
+            <div class="why-item"><span class="check">✓</span>정적 데이터는 ScriptableObject · CSV · JSON 등의 방법으로, 동적 데이터는 PlayerPrefs · Redis · DB 등으로 다뤄요.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Let's call it a day ============ -->
+    <section class="plain-white">
+      <div class="slide-shell" style="position:relative; justify-content:center; align-items:center; padding:40px;">
+        <img src="Midias/letscallitaday.gif" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 '옴팡이' (작가 애소)</div>
+      </div>
+    </section>
+
+    <!-- ============ (이스터에그) 다음 주제 ============ -->
+    <section>
+      <div class="slide-shell">
+        <div class="body-wrap">
+          <h2 class="section-title">다음 주는, 이 <span class="emph">질문</span>으로 시작합니다.</h2>
+          <div class="teaser-wrap" style="gap:24px;">
+            <div class="teaser-icon" style="width:auto; height:auto;">
+              <span class="power-emoji" style="font-size:150px;">🏥</span>
+            </div>
+            <div class="teaser-question small"><span class="emph">트리아제</span>알아요?<br>어떻게 생각해요?</div>
+            <div class="teaser-caption mono">NEXT WEEK · ICE BREAKING</div>
+            <a href="https://youtu.be/HhE-gIGtqkw?si=8eLjmlaS8Ghytyt9" target="_blank" rel="noopener" class="chip-tag" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">▶ 참고 영상 ( 재미있을걸? )</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+  const TOTAL_PAGES = 22;
+  const FOOTER_TAG = 'WEEK 08';
+
+  document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
+    const page = el.getAttribute('data-page');
+    const header = document.createElement('div');
+    header.className = 'cs-header';
+    header.innerHTML = `<div class="brand"><div class="brand-badge">G</div><span>Capstone Game Engine</span></div>`;
+    const footer = document.createElement('div');
+    footer.className = 'cs-footer';
+    footer.innerHTML = `<div class="chip-tag">${FOOTER_TAG}</div><div class="chip-tag">${page} / ${TOTAL_PAGES}</div>`;
+    el.prepend(header);
+    el.append(footer);
+  });
+
+  // ---------- 클릭 팝업 (슬라이드 클릭 시 .content-popup 토글) ----------
+  document.querySelectorAll('.popup-reveal-slide').forEach(slide => {
+    const popup = slide.querySelector('.content-popup');
+    slide.addEventListener('click', () => {
+      popup.classList.toggle('show');
+    });
+  });
+
+  // ---------- 범용 클릭 리빌 (reveal-step을 순서대로 하나씩, 끝까지 가면 리셋) ----------
+  document.querySelectorAll('.click-reveal-2').forEach(slide => {
+    const steps = slide.querySelectorAll('.reveal-step');
+    let step = 0;
+    slide.addEventListener('click', () => {
+      step = (step + 1) % (steps.length + 1);
+      steps.forEach((el, i) => el.classList.toggle('show', step > i));
+    });
+  });
+
+  // ---------- 건물 단면도 클릭 리빌 (왼쪽 → 오른쪽 → 리셋) ----------
+  document.querySelectorAll('.house-reveal-slide').forEach(slide => {
+    const left = slide.querySelector('.house-pic.house-left');
+    const leftCap = slide.querySelector('.house-caption.house-left');
+    const right = slide.querySelector('.house-pic.house-right');
+    const rightCap = slide.querySelector('.house-caption.house-right');
+    let step = 0;
+    slide.addEventListener('click', () => {
+      step = (step + 1) % 3;
+      left.classList.toggle('show', step >= 1);
+      leftCap.classList.toggle('show', step >= 1);
+      right.classList.toggle('show', step >= 2);
+      rightCap.classList.toggle('show', step >= 2);
+    });
+  });
+
+  Reveal.initialize({
+    hash: true, controls: true, progress: true, center: false,
+    transition: 'fade', width: 1280, height: 720, margin: 0,
+  });
+
+  let wheelLocked = false;
+  document.addEventListener('wheel', (e) => {
+    if (wheelLocked || Math.abs(e.deltaY) < 1) return;
+    wheelLocked = true;
+    try { if (e.deltaY > 0) { Reveal.next(); } else { Reveal.prev(); } }
+    catch (err) { console.warn('Reveal not ready yet:', err); }
+    setTimeout(() => { wheelLocked = false; }, 600);
+  }, { passive: true });
+
+  // ---------- Cursor trail ----------
+  (() => {
+    const canvas = document.getElementById('cursorTrail');
+    const ctx = canvas.getContext('2d');
+    const rootStyle = getComputedStyle(document.documentElement);
+    const palette = ['--blue', '--green', '--pink', '--yellow-dark'].map(
+      v => rootStyle.getPropertyValue(v).trim()
+    );
+    let colorIndex = 0;
+    let particles = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    document.addEventListener('mousemove', (e) => {
+      particles.push({
+        x: e.clientX, y: e.clientY,
+        r: 9, alpha: 1,
+        color: palette[colorIndex++ % palette.length],
+      });
+      if (particles.length > 40) particles.shift();
+    });
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.r *= 0.92;
+        p.alpha *= 0.9;
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      particles = particles.filter(p => p.alpha > 0.03 && p.r > 0.5);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
+</script>
+</body>
+</html>
