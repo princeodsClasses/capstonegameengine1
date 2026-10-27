@@ -369,6 +369,18 @@
   }
   .revenue-emoji{ font-size:56px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.25)); }
   .revenue-text{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; }
+  .big-question-glow{
+    position:absolute; width:560px; height:560px; max-width:70vmin; max-height:70vmin;
+    border-radius:50%; background:radial-gradient(circle, rgba(255,206,61,.55) 0%, rgba(255,206,61,.0) 72%);
+    opacity:0; transform:scale(.92); transition:opacity .35s ease, transform .35s cubic-bezier(.22,.9,.3,1);
+    pointer-events:none;
+  }
+  .cui-popup.show .big-question-glow{ opacity:1; transform:scale(1); }
+  .big-question{
+    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:360px !important; line-height:1 !important;
+    color:var(--yellow) !important; -webkit-text-stroke:13px var(--ink); paint-order:stroke fill;
+    filter:drop-shadow(0 10px 0 rgba(0,0,0,.25)); border-radius:0; box-shadow:none !important;
+  }
   .revenue-text b{ color:var(--yellow); }
 
   /* ---------- 계란 이미지 반쪽 클릭 리빌 (좋은 UI 나쁜 UI) ---------- */
@@ -1083,7 +1095,7 @@
               <div class="doc-card doc-compact" style="max-width:640px; width:100%;">
                 <div class="doc-section" style="display:block;">
                   <div class="d-label" style="font-size:13px;">예시</div>
-                  <div class="d-line">“명중하면 화려한 이펙트가 생기게 하자.” → “플레이어가 명중과 빗나감을 알아차리고 짜릿함을 느끼게 하자!”<br>만들고 싶은 것을, 플레이어가 경험할 목표로 바꿔요.</div>
+                  <div class="d-line">“명중하면 화려한 이펙트가 생기게 하자.” → “플레이어가 명중과 빗나감을 알아차리고 대응할 수 있게 하자!”<br>만들고 싶은 것을, 플레이어가 경험할 목표로 바꿔요.</div>
                 </div>
               </div>
             </div>
@@ -1246,7 +1258,7 @@
 
     <!-- ============ 경험 점검 ③ · 시간과 반복 ============ -->
     <section>
-      <div class="slide-shell ux-principle ux-experience-slide" data-page="20">
+      <div class="slide-shell ux-principle ux-experience-slide img-popup-trigger" data-popup="q20Popup" style="cursor:pointer;" data-page="20">
         <div class="body-wrap">
           <h2 class="section-title" style="text-align:center; align-self:center;">기다리고 반복하는 시간도 설계했나요?</h2>
           <div class="teaser-caption mono" style="text-align:center;">경험 점검 ③ · 시간과 반복</div>
@@ -1258,6 +1270,10 @@
             </div>
             <div style="display:flex; justify-content:center;"><div class="doc-card doc-compact"><div class="doc-section"><div class="d-label">반복 플레이 예시</div><div class="d-line">같은 일일 임무를 매번 같은 순서로 진행 → 경로 · 목표 · 전략의 선택을 주거나, 익숙한 준비 절차를 줄여요.<br>모든 시간을 짧게 만들기보다, <b>의도한 긴장과 휴식은 살리고 불필요한 마찰을 줄여요.</b></div></div></div>
           </div>
+        </div>
+        <div class="cui-popup no-backdrop" id="q20Popup">
+          <div class="big-question-glow"></div>
+          <div class="cui-popup-img big-question">?</div>
         </div>
       </div>
     </section>
