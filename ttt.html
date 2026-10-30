@@ -420,6 +420,15 @@
     overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); cursor:default;
   }
   .video-popup-frame iframe{ width:100%; height:100%; border:0; display:block; }
+  .guess-mark{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    background:#18242e; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:96px;
+  }
+  .item-number{
+    flex:0 0 auto; width:28px; height:28px; border-radius:50%;
+    background:var(--c, var(--blue)); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-size:14px; font-weight:800; box-shadow:0 2px 0 rgba(0,0,0,.15);
+  }
 
   /* 클릭하면 예시 이미지가 뜨는 팝업 (신의 탑) */
   .image-popup{
@@ -436,22 +445,6 @@
   .image-popup-frame img{ max-width:100%; max-height:72vh; border-radius:10px; display:block; }
   .image-popup-credit{ margin-top:12px; font-size:12px; letter-spacing:.3px; color:var(--ink-faint); }
 
-  /* 화면 없이 컨트롤만 있는 재생목록 플레이어 (언더테일 OST) */
-  .audio-player-frame{
-    background:#fff; border-radius:20px; padding:40px 52px;
-    box-shadow:0 20px 60px rgba(0,0,0,.5); cursor:default;
-    display:flex; flex-direction:column; align-items:center; gap:24px; min-width:320px;
-  }
-  .audio-player-title{
-    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:19px; color:var(--ink); text-align:center;
-  }
-  .audio-player-controls{ display:flex; align-items:center; gap:24px; }
-  .audio-player-controls button{
-    width:54px; height:54px; border-radius:50%; border:0; cursor:pointer;
-    background:var(--pink-dark); color:#fff; font-size:20px;
-    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 0 rgba(0,0,0,.15);
-  }
-  .audio-player-controls button#undertalePlayPause{ width:66px; height:66px; font-size:24px; background:var(--ink); }
 
   /* 슬라이드 상단에 바로 보이는 영상 (RF 티저) */
   .video-embed{
@@ -613,7 +606,7 @@
       <div class="slide-shell" data-page="05">
         <div class="break-body">
           <div class="break-eyebrow">PART 2 · 기획</div>
-          <h2 class="break-hero"><span class="emph">좋은 요소</span>들만 모아 놓으면,<br><span class="emph">좋은 경험</span>이 될까요?</span></h2>
+          <h2 class="break-hero"><span class="emph">좋은 요소</span>들만 모아 놓으면,<br><span class="emph">좋은 경험</span>이 될까요?</h2>
           <div class="break-sub">오디오 자체의 완성도와, 게임 안에서 어우러지는 방식은 함께 살펴봐야 해요.</div>
         </div>
       </div>
@@ -829,15 +822,16 @@
             <div class="card-row" style="--cols:3">
               <div class="feature-card ff7-trigger-card" style="--accent:var(--blue); cursor:pointer;" title="클릭하면 들어볼 수 있어요">
                 <div class="feature-title">FF VII 원작 · 상실</div>
-                <div class="feature-desc">에어리스 장면의 작은 마테리아 소리, 테마의 진입과 이어지는 전투를 함께 살펴봐요.</div>
+                <div class="feature-desc">마테리아 소리.<br>같은 지향점의 오디오 이펙트가 연속성을 가지고 사용되고 있어요.</div>
               </div>
               <div class="feature-card sotc-trigger-card" style="--accent:var(--grass-dark); cursor:pointer;" title="클릭하면 영상을 볼 수 있어요">
                 <div class="feature-title">완다와 거상 · 거상의 죽음</div>
-                <div class="feature-desc">격렬했던 전투 음악이, 거상이 쓰러지는 순간 단 몇 초 만에 암울한 정적으로 바뀌어요.</div>
+                <div class="feature-desc">거상을 처치하는 소리.<br>거상이 죽을 때의 오디오 이펙트. 그리고 그 전과 후를 다르게 표현하는 BGM.</div>
               </div>
               <div class="feature-card undertale-trigger-card" style="--accent:var(--pink-dark); cursor:pointer;" title="클릭하면 들어볼 수 있어요">
-                <div class="feature-title">언더테일 · 규칙의 파괴</div>
-                <div class="feature-desc">아스고어가 자비 버튼을 부수는 사건과 소리·음악 전환. 게임 UI가 서사에 참여해요.</div>
+                <div class="feature-title">메탈기어 솔리드</div>
+                <div class="feature-desc">이건.. 다들 들어봤죠??</div>
+                <audio id="mgsAlertAudio" src="Midias/w10/MetalGearSolidAlertAudioEffect.mp3" preload="auto"></audio>
               </div>
             </div>
             <div class="doc-card">
@@ -857,17 +851,6 @@
             <iframe id="sotcIframe" src="" title="완다와 거상 영상" allow="autoplay; encrypted-media" allowfullscreen></iframe>
           </div>
         </div>
-        <div class="video-popup" id="undertalePopup">
-          <div class="audio-player-frame">
-            <div class="audio-player-title" id="undertaleTrackTitle">재생목록</div>
-            <div class="audio-player-controls">
-              <button type="button" id="undertalePrev" aria-label="이전 트랙">⏮</button>
-              <button type="button" id="undertalePlayPause" aria-label="재생 / 일시정지">▶</button>
-              <button type="button" id="undertaleNext" aria-label="다음 트랙">⏭</button>
-            </div>
-            <div id="undertaleYtMount" style="width:0; height:0; overflow:hidden;"></div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -877,24 +860,38 @@
         <div class="body-wrap">
           <h2 class="section-title">BGM은 <span class="emph">쌓인 기억</span>을 불러와요.</h2>
           <div class="content">
-            <div class="card-row" style="--cols:3">
-              <div class="feature-card" style="--accent:var(--blue);">
-                <div class="feature-title">스타워즈 / 록키</div>
-                <div class="feature-desc">익숙한 테마를 들을 때 어떤 장면과 기대가 떠오르나요? 처음 듣는 사람도 같을까요?</div>
+            <div class="why-list">
+              <div class="why-item guess-bgm-card" style="cursor:pointer;" title="클릭해서 맞혀봐요" data-video="https://www.youtube.com/embed/3q2lZusQaJ4?autoplay=1" data-answer="Lost Ark : Star Light Island">
+                <span class="item-number" style="--c:var(--blue);">1</span>
+                <span class="guess-prompt">이 것 알아요?</span>
               </div>
-              <div class="feature-card" style="--accent:var(--grass-dark);">
-                <div class="feature-title">별빛 등대의 섬</div>
-                <div class="feature-desc">지난주 이야기했던 경험으로 돌아가요. 곡만 좋았나요, 그곳에 이르기까지의 경험도 남았나요?</div>
+              <div class="why-item guess-bgm-card" style="cursor:pointer;" title="클릭해서 맞혀봐요" data-video="https://www.youtube.com/embed/xrIdIxIFcdE?start=1378&autoplay=1" data-answer="Lost Ark : Glory of Luteran">
+                <span class="item-number" style="--c:var(--grass-dark);">2</span>
+                <span class="guess-prompt">이 것도 맞춰볼래요?</span>
               </div>
-              <div class="feature-card" style="--accent:var(--pink-dark);">
-                <div class="feature-title">우리 게임</div>
-                <div class="feature-desc">처음 듣는 순간과 여러 번 플레이한 뒤 같은 곡을 듣는 순간은 어떻게 달라질까요?</div>
+              <div class="why-item guess-bgm-card" style="cursor:pointer;" title="클릭해서 맞혀봐요" data-video="https://www.youtube.com/embed/ob8TNqQw2hY?autoplay=1" data-answer="Rocky III : Eye of the Tiger ( Survivor )">
+                <span class="item-number" style="--c:var(--pink-dark);">3</span>
+                <span class="guess-prompt">다음!</span>
+              </div>
+              <div class="why-item guess-bgm-card" style="cursor:pointer;" title="클릭해서 맞혀봐요" data-video="https://www.youtube.com/embed/54hoKbTWon4?autoplay=1" data-answer="Star Wars: A New Hope Main Theme">
+                <span class="item-number" style="--c:var(--yellow-dark);">4</span>
+                <span class="guess-prompt">이건 알겠지..!!</span>
+              </div>
+              <div class="why-item">
+                <span class="item-number" style="--c:var(--ink-faint);">5</span>
+                <span><b>우리 게임</b> — 처음 듣는 순간과 여러 번 플레이한 뒤 같은 곡을 듣는 순간은 어떻게 달라질까요?</span>
               </div>
             </div>
             <div class="doc-card">
               <div class="d-label">같은 기준으로 보기</div>
               <div class="d-line">브랜드 · 이야기 · 플레이의 기억과 음악이 연결되는 과정을 살펴봐요.</div>
             </div>
+          </div>
+        </div>
+        <div class="video-popup" id="bgmGuessPopup">
+          <div class="video-popup-frame">
+            <div class="guess-mark" id="bgmGuessMark">?</div>
+            <iframe id="bgmGuessIframe" src="" title="BGM 정답 영상" allow="autoplay; encrypted-media" allowfullscreen style="display:none;"></iframe>
           </div>
         </div>
       </div>
@@ -1580,7 +1577,6 @@ AudioManager.Singleton.SetMuted(false);</pre>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
   const TOTAL_PAGES = 41;
   const FOOTER_TAG = 'WEEK 10';
@@ -1680,59 +1676,64 @@ AudioManager.Singleton.SetMuted(false);</pre>
     popup.querySelector('.video-popup-frame').addEventListener('click', (e) => e.stopPropagation());
   })();
 
-  // ---------- 언더테일 OST 재생목록 (화면 없이 컨트롤만, 클릭해서 열고/닫기) ----------
+  // ---------- 메탈기어 솔리드 경계 효과음 (클릭할 때마다 재생) ----------
   (() => {
     const trigger = document.querySelector('.undertale-trigger-card');
-    const popup = document.getElementById('undertalePopup');
-    if (!trigger || !popup) return;
-    const prevBtn = document.getElementById('undertalePrev');
-    const nextBtn = document.getElementById('undertaleNext');
-    const playPauseBtn = document.getElementById('undertalePlayPause');
-    const titleEl = document.getElementById('undertaleTrackTitle');
-
-    let player = null;
-    const initPlayer = () => {
-      player = new YT.Player('undertaleYtMount', {
-        height: '0', width: '0',
-        playerVars: { listType: 'playlist', list: 'PLJeB2bucrnIk' },
-        events: {
-          onStateChange: (e) => {
-            if (e.data === YT.PlayerState.PLAYING) {
-              playPauseBtn.textContent = '⏸';
-              const data = player.getVideoData();
-              titleEl.textContent = data && data.title ? data.title : '재생 중';
-            } else if (e.data === YT.PlayerState.PAUSED) {
-              playPauseBtn.textContent = '▶';
-            }
-          },
-        },
-      });
-    };
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      const prevReady = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (prevReady) prevReady();
-        initPlayer();
-      };
-    }
-
-    const open = () => { popup.classList.add('show'); if (player && player.playVideo) player.playVideo(); };
-    const close = () => { popup.classList.remove('show'); if (player && player.pauseVideo) player.pauseVideo(); };
+    const audio = document.getElementById('mgsAlertAudio');
+    if (!trigger || !audio) return;
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      popup.classList.contains('show') ? close() : open();
+      audio.currentTime = 0;
+      audio.play();
     });
-    popup.addEventListener('click', close);
-    popup.querySelector('.audio-player-frame').addEventListener('click', (e) => e.stopPropagation());
-    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); player && player.previousVideo(); });
-    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); player && player.nextVideo(); });
-    playPauseBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!player) return;
-      if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
-      else player.playVideo();
+  })();
+
+  // ---------- BGM 맞히기 (1단계: "?" → 2단계: 영상 공개 → 닫기 + 카드에 정답 표시) ----------
+  (() => {
+    const popup = document.getElementById('bgmGuessPopup');
+    const mark = document.getElementById('bgmGuessMark');
+    const iframe = document.getElementById('bgmGuessIframe');
+    const cards = document.querySelectorAll('.guess-bgm-card');
+    if (!popup || !mark || !iframe || !cards.length) return;
+
+    let activeCard = null;
+    let step = 0;
+
+    const render = () => {
+      if (step === 0) {
+        popup.classList.remove('show');
+        iframe.src = '';
+        iframe.style.display = 'none';
+        mark.style.display = 'flex';
+        if (activeCard) {
+          const promptEl = activeCard.querySelector('.guess-prompt');
+          if (promptEl) promptEl.textContent = activeCard.dataset.answer;
+        }
+        activeCard = null;
+        return;
+      }
+      popup.classList.add('show');
+      if (step === 1) {
+        iframe.src = activeCard.dataset.video;
+        mark.style.display = 'flex';
+        iframe.style.display = 'none';
+      } else {
+        mark.style.display = 'none';
+        iframe.style.display = 'block';
+      }
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activeCard !== card) { activeCard = card; step = 0; }
+        step = (step + 1) % 3;
+        render();
+      });
+    });
+    popup.addEventListener('click', () => {
+      step = (step + 1) % 3;
+      render();
     });
   })();
 
