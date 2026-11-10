@@ -224,6 +224,32 @@
   }
   .home-btn:hover{ box-shadow:var(--card-shadow-lg); }
 
+  /* ---------- Image modal (카드 클릭 > gif 팝업) ---------- */
+  .feature-card[data-modal-img], .feature-card[data-modal-video], .feature-card[data-modal-videos],
+  .doc-card[data-modal-img], .doc-card[data-modal-video], .doc-card[data-modal-videos]{ cursor:pointer; }
+  .img-modal-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(27,43,58,.75);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .img-modal-overlay.show{ opacity:1; pointer-events:auto; }
+  .img-modal-card{
+    position:relative; max-width:80vw; max-height:80vh;
+    background:var(--white); border-radius:20px; padding:18px;
+    box-shadow:var(--card-shadow-lg);
+    transform:scale(.92); transition:transform .2s ease;
+  }
+  .img-modal-overlay.show .img-modal-card{ transform:scale(1); }
+  .img-modal-card img{ max-width:100%; max-height:70vh; display:block; border-radius:12px; }
+  .img-modal-card iframe{ width:70vw; max-width:900px; height:39.375vw; max-height:506px; display:block; border:0; border-radius:12px; }
+  .img-modal-close{
+    position:absolute; top:-16px; right:-16px; width:40px; height:40px; border-radius:50%;
+    background:var(--pink-dark); color:#fff; border:none; font-size:18px; font-weight:800; cursor:pointer;
+    box-shadow:var(--card-shadow); display:flex; align-items:center; justify-content:center;
+  }
+  .img-modal-close:hover{ box-shadow:var(--card-shadow-lg); }
+
   /* ---------- Cursor trail ---------- */
   #cursorTrail{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999; }
 
@@ -367,6 +393,14 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
 
 <canvas id="cursorTrail"></canvas>
 
+<div class="img-modal-overlay" id="imgModalOverlay">
+  <div class="img-modal-card">
+    <button class="img-modal-close" id="imgModalClose">✕</button>
+    <img id="imgModalImg" src="" alt="예시 이미지">
+    <iframe id="imgModalVideo" src="" style="display:none;" title="예시 영상" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+</div>
+
 <div class="reveal">
   <div class="slides">
 
@@ -465,7 +499,7 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
               </div>
               <div class="feature-card" style="--accent:var(--grass-dark);">
                 <div class="eyebrow" style="font-size: 25px;">게임에서 특수 효과는?</div>
-                <div class="feature-desc">시청각적 품질과 현실감을 제고하여 <b>몰입감</b> 증대 &gt;&gt;&gt; <b>재미</b> 증대로 이어져요.<br>부자연스러운 것을 가리기 위해서도 사용해요.</div>
+                <div class="feature-desc">시청각적 품질과 현실감을 제고하여 <b>몰입감</b> 증대 &gt;&gt;&gt; <b>재미</b> 증대로 이어져요.<br><br>때로는 부자연스러운 것을 가리기 위해서도 사용해요.</div>
               </div>
             </div>
           </div>
@@ -479,22 +513,22 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
           <h2 class="section-title">특수 효과의 <span class="emph">네 가지 갈래</span></h2>
           <div class="content">
             <div class="card-row" style="--cols:2">
-              <div class="feature-card" style="--accent:var(--blue);">
+              <div class="feature-card" data-modal-videos="https://www.youtube.com/embed/itnqEauWQZM,https://www.youtube.com/embed/y_RI3bZhU50" style="--accent:var(--blue);">
                 <div class="card-icon">✨</div>
                 <div class="feature-title">파티클 시스템</div>
                 <div class="feature-desc">작은 이미지를 여러 개 뿌려 불 · 연기 · 눈 같은 효과를 만들어요.</div>
               </div>
-              <div class="feature-card" style="--accent:var(--grass-dark);">
+              <div class="feature-card" data-modal-img="Midias/w11/5.gif" style="--accent:var(--grass-dark);">
                 <div class="card-icon">🔆</div>
                 <div class="feature-title">물리 기반의 렌더링</div>
                 <div class="feature-desc">빛이 실제 재질에 부딪히는 방식을 흉내 내 표면을 사실적으로 보여줘요.</div>
               </div>
-              <div class="feature-card" style="--accent:var(--pink-dark);">
+              <div class="feature-card" data-modal-img="Midias/w11/6.gif" style="--accent:var(--pink-dark);">
                 <div class="card-icon">💡</div>
                 <div class="feature-title">라이팅과 쉐이딩</div>
                 <div class="feature-desc">빛과 그림자로 입체감과 분위기를 만들어요.</div>
               </div>
-              <div class="feature-card" style="--accent:var(--blue);">
+              <div class="feature-card" data-modal-img="Midias/w11/7.gif" style="--accent:var(--blue);">
                 <div class="card-icon">🎞️</div>
                 <div class="feature-title">포스트 프로세싱</div>
                 <div class="feature-desc">화면이 다 그려진 뒤, 색감 · 흐림 같은 후처리를 더해요.</div>
@@ -511,14 +545,14 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
           <h2 class="section-title"><span class="emph">파티클 시스템</span>이란?</h2>
           <div class="content">
             <div class="doc-card">
-              <div class="d-label">파티클 시스템이란?</div>
-              <div class="d-line">이미지나 모델(<b>Particle</b>)을 사용하여 시각적 효과를 생성하는 시스템이에요.<br>불 / 연기 / 물 / 눈 등 다양한 효과 연출이 가능해요.</div>
+              <div class="d-label" style="font-size: 25px;">파티클 시스템이란?</div>
+              <div class="d-line"><br>이미지나 모델(<b>Particle</b>)을 사용하여 시각적 효과를 생성하는 시스템이에요.<br>불 / 연기 / 물 / 눈 등 다양한 효과 연출이 가능해요.</div>
             </div>
             <div class="doc-card">
-              <div class="d-label">좋은 파티클 (특수 효과)</div>
-              <div class="d-line" style="font-size:24px;font-weight:800;">화려한 것 ( <span style="color:var(--pink-dark);">X</span> ) → 자연스러운 것 ( <span style="color:var(--grass-dark);">O</span> )</div>
+              <div class="d-label" style="font-size: 25px;">좋은 파티클 (특수 효과)</div>
+              <div class="d-line"><br>화려한 것 ( <span style="color:var(--pink-dark);">X</span> ) → 자연스러운 것 ( <span style="color:var(--grass-dark);">O</span> )</div>
             </div>
-            <div class="note center">너무 화려하게 꾸미기보다, 그 장면에 <b>자연스럽게 녹아드는지</b>를 먼저 봐요.</div>
+            <div class="note center"><br>너무 화려하게 꾸미기보다, 그 장면에 <b>자연스럽게 녹아드는지</b>를 먼저 봐요.</div>
           </div>
         </div>
       </div>
@@ -548,8 +582,8 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
               </div>
             </div>
             <div class="doc-card">
-              <div class="d-label">전부 같은 원리예요</div>
-              <div class="d-line">생김새는 다 달라도, <b>Emission · Shape · Color over Lifetime</b> 같은 같은 모듈 조합으로 만들어요. 오늘은 이 중 Rain Drop과 Fireworks를 직접 만들어봐요.</div>
+              <div class="d-label" style="font-size: 25px;">전부 같은 원리예요</div>
+              <div class="d-line"><br>생김새는 다 달라도, <b>Emission · Shape · Color over Lifetime</b> 같은 같은 모듈 조합으로 만들어요.</div>
             </div>
           </div>
         </div>
@@ -576,8 +610,8 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
               </div>
             </div>
             <div class="doc-card">
-              <div class="d-label">오늘은</div>
-              <div class="d-line">기본 내장된 <b>Shuriken</b>으로, 모듈 하나하나가 어떤 역할을 하는지부터 익혀요. VFX Graph는 이 개념 위에서 규모만 키운 버전이라, 오늘 익히는 개념이 그대로 통해요.</div>
+              <div class="d-label" style="font-size: 25px;">오늘은</div>
+              <div class="d-line"><br>기본 내장된 <b>Shuriken</b>으로, 모듈 하나하나가 어떤 역할을 하는지부터 익혀요. VFX Graph는 이 개념 위에서 규모만 키운 버전이라, 오늘 익히는 개념이 그대로 통해요.</div>
             </div>
           </div>
         </div>
@@ -609,8 +643,8 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
               </div>
             </div>
             <div class="doc-card">
-              <div class="d-label">기억해둘 것</div>
-              <div class="d-line">모듈은 <b>필요한 것만 켜서</b> 써요. 다 켠다고 좋은 효과가 되진 않아요 — 앞서 본 "자연스러움"의 기준을 떠올려요.</div>
+              <div class="d-label" style="font-size: 25px;">기억해둘 것</div>
+              <div class="d-line"><br>모듈은 <b>필요한 것만 켜서</b> 써요. 다 켠다고 좋은 효과가 되진 않아요 — 앞서 본 "자연스러움"의 기준을 떠올려요.</div>
             </div>
           </div>
         </div>
@@ -682,8 +716,8 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
               </div>
             </div>
             <div class="doc-card">
-              <div class="d-label">자주 하는 실수</div>
-              <div class="d-line">Local로 두고 이미터를 움직이면, 이미 태어난 입자까지 같이 끌려와요. 뒤에서 볼 Rain Drop · Fireworks는 둘 다 World를 써요.</div>
+              <div class="d-label" style="font-size: 25px;">자주 하는 실수</div>
+              <div class="d-line"><br>Local로 두고 이미터를 움직이면, 이미 태어난 입자까지 같이 끌려와요. 뒤에서 볼 Rain Drop · Fireworks는 둘 다 World를 써요.</div>
             </div>
           </div>
         </div>
@@ -760,9 +794,9 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
                 <div class="feature-desc">Color over Lifetime로 점점 사그라들고, Trail로 궤적을 남겨요.</div>
               </div>
             </div>
-            <div class="doc-card">
-              <div class="d-label">참고</div>
-              <div class="d-line">실제 불꽃놀이 영상을 잠깐 보고, <b>발사 → 정점 → 폭발 → 사그라듦</b>의 타이밍을 눈으로 익혀봐요.</div>
+            <div class="doc-card" data-modal-video="https://www.youtube.com/embed/hG-LbHZ-WMA">
+              <div class="d-label" style="font-size: 25px;">참고</div>
+              <div class="d-line"><br>실제 불꽃놀이 영상을 잠깐 보고, <b>발사 → 정점 → 폭발 → 사그라듦</b>의 타이밍을 눈으로 익혀봐요.</div>
             </div>
           </div>
         </div>
@@ -931,6 +965,62 @@ html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !import
     hash: true, controls: true, progress: true, center: false,
     transition: 'fade', width: 1280, height: 720, margin: 0,
   });
+
+  // ---------- Image / Video modal (카드 클릭 > gif·영상 팝업) ----------
+  (() => {
+    const overlay = document.getElementById('imgModalOverlay');
+    const imgEl = document.getElementById('imgModalImg');
+    const videoEl = document.getElementById('imgModalVideo');
+    const closeBtn = document.getElementById('imgModalClose');
+
+    const openImageModal = (src) => {
+      imgEl.src = src;
+      imgEl.style.display = 'block';
+      videoEl.style.display = 'none';
+      overlay.classList.add('show');
+    };
+    const openVideoModal = (src) => {
+      videoEl.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=1';
+      videoEl.style.display = 'block';
+      imgEl.style.display = 'none';
+      overlay.classList.add('show');
+    };
+    const cycleCards = document.querySelectorAll('[data-modal-videos]');
+
+    const resetCycles = () => {
+      cycleCards.forEach(c => { c.dataset.step = '0'; });
+    };
+
+    const closeModal = () => {
+      overlay.classList.remove('show');
+      imgEl.src = '';
+      videoEl.src = '';
+      resetCycles();
+    };
+
+    document.querySelectorAll('[data-modal-img]').forEach(card => {
+      card.addEventListener('click', () => openImageModal(card.dataset.modalImg));
+    });
+    document.querySelectorAll('[data-modal-video]').forEach(card => {
+      card.addEventListener('click', () => openVideoModal(card.dataset.modalVideo));
+    });
+    cycleCards.forEach(card => {
+      const videos = card.dataset.modalVideos.split(',');
+      card.dataset.step = '0';
+      card.addEventListener('click', () => {
+        const step = parseInt(card.dataset.step, 10);
+        if (step >= videos.length) {
+          closeModal();
+          return;
+        }
+        openVideoModal(videos[step]);
+        card.dataset.step = String(step + 1);
+      });
+    });
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  })();
 
   let wheelLocked = false;
   document.addEventListener('wheel', (e) => {
