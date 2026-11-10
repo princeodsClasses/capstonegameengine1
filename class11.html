@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>11주차 · 피드백·연출 기획과 파티클 — Capstone Game Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root{
+    --sky-1: #bdeaff;
+    --sky-2: #eaf9ff;
+    --grass: #6bc55a;
+    --grass-dark: #4a9e3d;
+    --blue: #1f9be0;
+    --blue-dark: #0f7fc2;
+    --yellow: #ffce3d;
+    --yellow-dark: #f2a900;
+    --pink: #ff6fae;
+    --pink-dark: #d94c8a;
+    --green: #3ddc6a;
+    --green-dark: #1fb852;
+    --ink: #1b2b3a;
+    --ink-soft: #3a5266;
+    --ink-faint: rgba(27,43,58,.45);
+    --white: #ffffff;
+    --dash: rgba(27,43,58,.20);
+    --card-shadow: 0 4px 0 rgba(0,0,0,.08);
+    --card-shadow-lg: 0 8px 0 rgba(0,0,0,.10), 0 16px 28px #0000001a;
+  }
+  *{box-sizing:border-box;}
+  html, body{background:var(--sky-2); margin:0; padding:0;}
+  .reveal{font-family:'Nunito',sans-serif; color:var(--ink);}
+  .reveal .slides{text-align:left;}
+  .reveal .slides section{
+    background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 55%, #eafce0 100%);
+    height:100%; padding:0;
+  }
+  .reveal .slides section.plain-white{ background:#fff; }
+  .img-credit{ position:absolute; right:16px; bottom:12px; font-size:11px; color:var(--ink-faint); }
+  .display{font-family:'Baloo 2',sans-serif;}
+  .mono{font-family:'Nunito',sans-serif; font-weight:800;}
+
+  /* ---------- shared slide shell ---------- */
+  .slide-shell{
+    position:relative; height:100%; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:36px 56px;
+  }
+  .cloud{ position:absolute; background:#fff; border-radius:50%; opacity:.6;
+    animation: drift 2s ease-in-out infinite alternate; }
+  @keyframes drift{ from{transform:translateX(0);} to{transform:translateX(50px);} }
+
+  /* ---------- top / bottom bars ---------- */
+  .cs-header{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:32px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .brand-badge{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+    box-shadow:0 3px 0 var(--blue-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:16px; color:#fff;
+  }
+  .brand span{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:var(--ink);
+  }
+
+  .cs-footer{
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .chip-tag{
+    background:rgba(255,255,255,.85); border-radius:999px; padding:8px 18px;
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; letter-spacing:.4px; color:var(--ink-soft);
+    box-shadow:var(--card-shadow);
+  }
+  .chip-tag b{color:var(--ink);}
+
+  /* ---------- headline system ---------- */
+  .section-title{
+    font-family:'Baloo 2',sans-serif !important;
+    font-size:34px !important; font-weight:700 !important;
+    color:var(--ink) !important; margin:0 !important;
+  }
+  .section-title .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%);
+    padding:0 4px;
+  }
+  .body-wrap{ position:relative; z-index:3; flex:1; min-height:0; display:flex; flex-direction:column; justify-content:flex-start; }
+
+  /* ---------- Title slide ---------- */
+  .title-stage{ padding:32px 48px; }
+  .pill-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px;
+    padding:8px 20px; border-radius:999px;
+    box-shadow:0 4px 0 var(--yellow-dark);
+    margin-bottom:24px;
+  }
+  .title-main{ display:flex; align-items:center; justify-content:center; height:100%; padding:0 8px; }
+  .title-copy{ max-width:1040px; text-align:center; }
+  .headline-hero{
+    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:76px !important; line-height:1.05 !important;
+    color:var(--white) !important; margin:0 !important; letter-spacing:-1px;
+    -webkit-text-stroke:7px var(--ink); paint-order:stroke fill;
+    filter:drop-shadow(0 8px 0 rgba(0,0,0,.15));
+  }
+  .subline{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--ink-soft); margin-top:22px; }
+
+  /* ---------- Feature cards ---------- */
+  .obj-grid{ display:flex; flex-direction:column; gap:14px; margin-top:34px; }
+  .feature-card{ display:flex; gap:18px; align-items:flex-start; padding:20px 26px; border-radius:16px;
+    background:var(--white); box-shadow:var(--card-shadow); }
+  .feature-num{ font-family:'Baloo 2',sans-serif; font-size:18px; color:var(--blue-dark); font-weight:800; flex:0 0 auto; }
+  .feature-title{ font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+  .feature-desc{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Step cards ---------- */
+  .step-cards{ width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:36px; align-items:stretch; }
+  .step-card{
+    position:relative; background:var(--white);
+    border:3px solid var(--c); border-radius:22px 22px 70px 70px;
+    padding:52px 26px 32px; text-align:center; box-shadow:var(--card-shadow);
+  }
+  .step-icon{
+    position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+    width:56px; height:56px; border-radius:50%; background:var(--c);
+    box-shadow:0 4px 0 rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .step-label{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:13px; letter-spacing:1px; color:var(--c); margin-bottom:10px; }
+  .step-title{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; color:var(--ink); margin-bottom:12px; line-height:1.3; }
+  .step-desc{ font-size:13px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ---------- Teaser (질문 reveal) ---------- */
+  .teaser-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:22px; }
+  .teaser-icon{ position:relative; width:130px; height:130px; display:flex; align-items:center; justify-content:center; }
+  .teaser-icon .power-emoji{ position:relative; font-size:52px; filter:drop-shadow(0 3px 0 rgba(0,0,0,.15)); }
+  .teaser-question{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:44px; line-height:1.45;
+    letter-spacing:-.5px; color:var(--ink); max-width:800px;
+    text-shadow:0 3px 0 rgba(0,0,0,.08);
+  }
+  .teaser-question.small{ font-size:34px; max-width:720px; }
+  .teaser-question .emph{
+    color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 6px;
+  }
+  .teaser-caption{ font-size:12px; letter-spacing:1.5px; color:var(--ink-faint); }
+
+  /* ---------- Doc card (코드 예시) ---------- */
+  .doc-card{
+    background:var(--ink); border-radius:20px; padding:26px 34px;
+    box-shadow:var(--card-shadow-lg); flex:1;
+  }
+  .doc-card .doc-title{
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:35px; color:#fff; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .doc-card .doc-title .tag{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; letter-spacing:.6px;
+    background:var(--yellow); color:var(--ink); padding:3px 10px; border-radius:8px;
+  }
+  .doc-section{ margin-bottom:12px; }
+  .doc-section .d-label{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; color:var(--yellow);
+    border-left:3px solid var(--yellow); padding-left:8px; margin-bottom:4px;
+  }
+  .doc-section .d-line{ font-size:15px; color:#dfe8ee; line-height:1.55; padding-left:11px; }
+  .doc-section .d-line.placeholder{ color:rgba(223,232,238,.45); font-style:italic; }
+  .doc-card.doc-compact{ padding:22px 30px; }
+  .doc-card.doc-compact .doc-title{ font-size:26px; margin-bottom:14px; }
+  .doc-card.doc-compact .doc-section{ display:block; margin-bottom:11px; }
+  .doc-card.doc-compact .doc-section .d-label{ font-size:16px; margin-bottom:4px; }
+  .doc-card.doc-compact .doc-section .d-line{ font-size:14px; line-height:1.5; padding-left:0; }
+  .doc-code{
+    font-family:'Consolas','Menlo',monospace; font-size:13.5px; line-height:1.7; color:#d4d4d4;
+    background:#1e1e1e; border-radius:10px; padding:14px 18px; white-space:pre-wrap;
+    margin-left:11px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .code-kw{ color:#569cd6; }
+  .code-type{ color:#4ec9b0; }
+  .code-fn{ color:#dcdcaa; }
+  .code-str{ color:#ce9178; }
+  .code-cm{ color:#6a9955; }
+  .code-var{ color:#9cdcfe; }
+  .doc-columns{ display:flex; gap:24px; margin-top:18px; flex:1; }
+
+  /* ---------- Timeline-like list (오늘 정리) ---------- */
+  .why-list{ display:flex; flex-direction:column; gap:20px; margin-top:20px; }
+  .why-item{
+    display:flex; align-items:center; gap:14px; background:var(--white); border-radius:14px;
+    padding:22px 32px; box-shadow:var(--card-shadow); font-size:15px; color:var(--ink-soft); font-weight:600;
+  }
+  .why-item .check{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:var(--green);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
+    box-shadow:0 2px 0 var(--green-dark);
+  }
+
+  /* ---------- Closing ---------- */
+  .break-body{ position:relative; z-index:3; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .break-eyebrow{ font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--ink-faint); letter-spacing:1px; margin-bottom:22px; }
+  .break-hero{ font-family:'Baloo 2',sans-serif !important; font-size:46px !important; font-weight:800 !important; color:#000 !important; line-height:1.35 !important; max-width:840px; margin:0 !important; }
+  .break-hero .emph{ color:var(--blue-dark);
+    background:linear-gradient(180deg, transparent 58%, rgba(255,206,61,.6) 58%); padding:0 4px; }
+  .break-sub{ font-size:16px; color:var(--ink-soft); margin-top:26px; max-width:760px; line-height:1.7; }
+  .break-sub .accent{ color:var(--blue-dark); font-weight:800; }
+
+  /* ---------- Home button ---------- */
+  .home-btn{
+    position:fixed; top:20px; left:24px; z-index:50;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--white); color:var(--ink); text-decoration:none;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px;
+    padding:9px 16px; border-radius:999px; box-shadow:var(--card-shadow);
+  }
+  .home-btn:hover{ box-shadow:var(--card-shadow-lg); }
+
+  /* ---------- Cursor trail ---------- */
+  #cursorTrail{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999; }
+
+  /* ---------- Card hover invert ---------- */
+  .feature-card, .step-card, .why-item{
+    transition: background .22s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .feature-card:hover, .step-card:hover, .why-item:hover{
+    transform:translateY(-3px); box-shadow:var(--card-shadow-lg); cursor:default;
+  }
+  .feature-card:nth-child(4n+1):hover{ background:var(--blue-dark); }
+  .feature-card:nth-child(4n+2):hover{ background:var(--green-dark); }
+  .feature-card:nth-child(4n+3):hover{ background:var(--pink-dark); }
+  .feature-card:nth-child(4n+4):hover{ background:var(--yellow-dark); }
+  .feature-card:hover .feature-num, .feature-card:hover .feature-title, .feature-card:hover .feature-desc, .feature-card:hover .eyebrow{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .step-card:hover{ background:var(--c); }
+  .step-card:hover .step-icon{ background:#fff; }
+  .step-card:hover .step-label, .step-card:hover .step-title, .step-card:hover .step-desc{ color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+
+  .why-item:hover{ background:var(--green-dark); color:#fff; text-shadow:-1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7), -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7); }
+  .why-item:hover .check{ background:#fff; color:var(--green-dark); }
+
+  /* ---------- Entrance animations ---------- */
+  @keyframes fadeUp{ 0%{ opacity:0; transform:translateY(16px); } 100%{ opacity:1; transform:translateY(0); } }
+  @keyframes popIn{ 0%{ opacity:0; transform:scale(.82); } 100%{ opacity:1; transform:scale(1); } }
+  @keyframes drawPath{ to{ stroke-dashoffset:0; } }
+
+  section.present .obj-grid .feature-card{ animation:fadeUp .5s ease-out both; }
+  section.present .obj-grid .feature-card:nth-child(1){ animation-delay:.05s; }
+  section.present .obj-grid .feature-card:nth-child(2){ animation-delay:.15s; }
+  section.present .obj-grid .feature-card:nth-child(3){ animation-delay:.25s; }
+  section.present .obj-grid .feature-card:nth-child(4){ animation-delay:.35s; }
+
+  section.present .grid-2x2 .feature-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .grid-2x2 .feature-card:nth-child(1){ animation-delay:.1s; }
+  section.present .grid-2x2 .feature-card:nth-child(2){ animation-delay:.22s; }
+  section.present .grid-2x2 .feature-card:nth-child(3){ animation-delay:.34s; }
+  section.present .grid-2x2 .feature-card:nth-child(4){ animation-delay:.46s; }
+
+  section.present .mini-row .mini-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .mini-row .mini-card:nth-child(1){ animation-delay:.1s; }
+  section.present .mini-row .mini-card:nth-child(2){ animation-delay:.26s; }
+  section.present .mini-row .mini-card:nth-child(3){ animation-delay:.42s; }
+
+  .draw-path{ stroke-dasharray:1; stroke-dashoffset:1; }
+  section.present .draw-path{ animation:drawPath .9s ease-out both; }
+  .svg-pop{ opacity:0; transform-box:fill-box; transform-origin:center; }
+  section.present .svg-pop{ animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
+  html.print-pdf .draw-path{ animation:none !important; stroke-dashoffset:0 !important; }
+  html.print-pdf .svg-pop{ animation:none !important; opacity:1 !important; transform:none !important; }
+
+  section.present .title-stage .pill-tag{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .title-stage .headline-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .title-stage .subline{ animation:fadeUp .6s ease-out .3s both; }
+
+  section.present .step-cards .step-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .step-cards .step-card:nth-child(1){ animation-delay:.1s; }
+  section.present .step-cards .step-card:nth-child(2){ animation-delay:.28s; }
+  section.present .step-cards .step-card:nth-child(3){ animation-delay:.46s; }
+  section.present .step-cards .step-card:nth-child(4){ animation-delay:.64s; }
+
+  section.present .why-list .why-item{ animation:fadeUp .5s ease-out both; }
+  section.present .why-list .why-item:nth-child(1){ animation-delay:.05s; }
+  section.present .why-list .why-item:nth-child(2){ animation-delay:.15s; }
+  section.present .why-list .why-item:nth-child(3){ animation-delay:.25s; }
+  section.present .why-list .why-item:nth-child(4){ animation-delay:.35s; }
+  section.present .why-list .why-item:nth-child(5){ animation-delay:.45s; }
+
+  section.present .doc-columns .doc-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .doc-columns .doc-card:nth-child(1){ animation-delay:.1s; }
+  section.present .doc-columns .doc-card:nth-child(2){ animation-delay:.28s; }
+
+  section.present .teaser-wrap .teaser-icon{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .teaser-wrap .teaser-question{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .teaser-wrap .teaser-caption{ animation:fadeUp .5s ease-out .35s both; }
+
+  section.present .break-body .break-eyebrow{ animation:fadeUp .5s ease-out both; }
+  section.present .break-body .break-hero{ animation:fadeUp .6s ease-out .15s both; }
+  section.present .break-body .break-sub{ animation:fadeUp .6s ease-out .35s both; }
+
+  /* ---------- Dictionary card (사전적 정의) ---------- */
+  .dict-card{
+    display:flex; flex-direction:column; width:100%; max-width:760px;
+    background:var(--white); border-radius:24px; padding:36px 44px;
+    box-shadow:var(--card-shadow-lg);
+  }
+  .dict-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:16px;
+    padding-bottom:14px; border-bottom:2px solid rgba(27,43,58,.1);
+  }
+  .dict-word{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:30px; color:var(--ink); }
+  .dict-body{ font-size:16px; color:var(--ink); line-height:1.7; }
+
+.reveal{font-family:'Nunito','Malgun Gothic',sans-serif;}
+.reveal h1,.reveal h2,.reveal h3{text-transform:none;}
+.slide-shell[data-page]{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:34px minmax(0,1fr) 30px;gap:20px;padding:32px 56px;}
+.cs-header{margin:0;}.cs-footer{padding-right:52px;align-items:center;}
+.home-btn{left:auto;right:24px;font-size:12px;padding:8px 14px;}
+.section-title{font-size:34px !important;line-height:1.3 !important;flex-shrink:0;}
+.body-wrap{gap:18px;min-height:0;min-width:0;}
+.lead{font-size:18px;line-height:1.65;color:var(--ink-soft);}
+.content{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:20px;}
+.card-row{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:20px;}
+.feature-card{flex-direction:column;gap:12px;min-width:0;padding:24px;border-top:5px solid var(--accent,var(--blue));}
+.feature-title{font-size:21px;line-height:1.4;margin:0;}
+.feature-desc{font-size:17px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;}
+.card-icon{font-size:32px;}.eyebrow{font-size:14px;font-weight:800;letter-spacing:.7px;color:var(--accent,var(--blue-dark));}
+.doc-card{flex:initial;padding:20px 26px;}.doc-card .d-label{font-size:17px;color:var(--yellow);font-weight:800;margin-bottom:8px;}.doc-card .d-line{font-size:17px;color:#e4edf4;line-height:1.6;}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;min-height:0;align-items:center;}
+.visual{background:white;padding:24px;border-radius:20px;box-shadow:var(--card-shadow);min-width:0;}
+.visual svg{width:100%;height:auto;display:block;}.stack{display:flex;flex-direction:column;gap:16px;min-height:0;}
+.note{font-size:15px;color:var(--ink-soft);line-height:1.6;}.center{text-align:center;}
+.code-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;flex:1;min-height:0;align-items:center;}
+.reveal pre.code{margin:0;width:100%;max-width:none;box-shadow:var(--card-shadow-lg);background:#18242e;border-radius:18px;padding:22px 26px;font:16px/1.6 Consolas,monospace;color:#e3edf4;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4;}
+.code-label{font:800 14px 'Nunito',sans-serif;color:var(--blue-dark);margin-bottom:10px;}
+.flow{display:flex;align-items:stretch;gap:12px;}.flow>.feature-card{flex:1;}.arrow{align-self:center;font-size:27px;color:var(--ink-faint);}
+.table{width:100%;border-collapse:separate;border-spacing:0;background:white;border-radius:18px;overflow:hidden;box-shadow:var(--card-shadow);font-size:17px;line-height:1.55;}
+.table-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.table-compact{font-size:12.5px;line-height:1.4;}
+.table-compact th{padding:8px 12px;font-size:12.5px;}
+.table-compact td{padding:7px 12px;}
+.table-compact td:first-child{width:42%;font-size:12.5px;}
+.table th{background:var(--ink);color:white;text-align:left;padding:15px 20px;font-size:17px;}.table td{padding:16px 20px;border-bottom:1px solid #e1eaf0;color:var(--ink-soft);}.table tr:last-child td{border-bottom:0;}.table td:first-child{font-weight:800;color:var(--ink);width:18%;}
+.diagram-label{font-size:18px;font-weight:700;fill:var(--ink);}.diagram-note{font-size:15px;fill:var(--ink-soft);}
+.reveal .fragment.visible{opacity:1;}button.reveal-answer{font:800 16px 'Nunito','Malgun Gothic',sans-serif;border:0;border-radius:999px;background:var(--yellow);color:var(--ink);padding:12px 22px;cursor:pointer;box-shadow:var(--card-shadow);}
+.answer{display:none;}.answer.show{display:block;}.answer-trigger{cursor:pointer;}.click-hint{font-size:14px;color:var(--blue-dark);font-weight:800;}
+.check-list{display:grid;grid-template-columns:1fr 1fr;gap:18px;}.check-item{background:white;padding:20px 24px;border-radius:16px;box-shadow:var(--card-shadow);font-size:17px;line-height:1.65;}.check-item b{display:block;color:var(--blue-dark);font-size:20px;margin-bottom:8px;}
+.why-list{gap:14px;margin:0;}.why-item{padding:18px 24px;font-size:18px;line-height:1.5;}
+.inspector{background:#25323f;color:white;padding:24px 28px;border-radius:18px;box-shadow:var(--card-shadow-lg);}.inspector h3{font-size:23px;color:var(--yellow);margin:0 0 18px;}.setting{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #ffffff20;padding:11px 0;font-size:17px;}.setting:last-child{border:0;}.setting b{color:#a8d9ff;}
+.reference{font-size:14px;color:var(--blue-dark);text-decoration:none;}.small-title{font-size:31px !important;}
+html.print-pdf .answer{display:block;}html.print-pdf .fragment{opacity:1 !important;visibility:visible !important;}html.print-pdf .home-btn,html.print-pdf #cursorTrail{display:none;}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;}}
+.reveal aside.notes{display:none;}
+.crowd-dot{opacity:1;}section.present .crowd-dot{animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;}
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="index.html">← Course Home</a>
+
+<canvas id="cursorTrail"></canvas>
+
+<div class="reveal">
+  <div class="slides">
+
+    <section>
+      <div class="slide-shell title-stage">
+        <div class="cloud" style="width:130px;height:72px;top:60px;left:12%;animation-duration:15s;"></div>
+        <div class="title-main">
+          <div class="title-copy">
+            <div class="pill-tag">🎮 GAME DESIGN × ENGINE</div>
+            <h1 class="headline-hero">Game Feel<br>&amp; Particles</h1>
+            <div class="subline">Capstone Game Engine · 11주차</div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">기술 참고: <a href="https://docs.unity3d.com/6000.0/Documentation/Manual/PartSysReference.html">Unity 공식 문서 — Particle System</a>.</aside>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="01">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘은 <span class="emph">이렇게</span> 진행할게요.</h2>
+          <div class="content">
+            <div class="step-cards">
+              <div class="step-card" style="--c:var(--pink-dark);">
+                <div class="step-icon">💬</div>
+                <div class="step-label">PART 1 · 토론</div>
+                <div class="step-title">개인주의</div>
+                <div class="step-desc">이 복잡한 네트워크가 구성된 현대 사회에서<br>개인주의가 성립할 수 있을까요?</div>
+              </div>
+              <div class="step-card" style="--c:var(--grass-dark);">
+                <div class="step-icon">✨</div>
+                <div class="step-label">PART 2 · 엔진</div>
+                <div class="step-title">Particle System</div>
+                <div class="step-desc">특수 효과 개념부터<br>Rain Drop · Fireworks<br>둘러봐요</div>
+              </div>
+              <div class="step-card" style="--c:var(--blue-dark);">
+                <div class="step-icon">❓</div>
+                <div class="step-label">PART 3 · ?????</div>
+                <div class="step-title">뭘까..</div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="02">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 1 · 토론</div>
+          <h2 class="break-hero">지난 주 예고했던,<br>그 <span class="emph">이야기</span> 해볼까요??</h2>
+          <div class="break-sub">오늘은 정답이 문제가 아니라..! 나를 한 번 설득해보겠어요?</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="03">
+        <div class="body-wrap">
+          <div class="teaser-wrap">
+            <div class="power-emoji" style="font-size:100px;">🧍</div>
+            <div class="teaser-question">현대 사회에서,<br><span class="emph">개인주의</span>가 가능할까요?</div>
+            <div class="lead center">나는 절대 성립되지 않는다 생각해요.<br>복잡하게 네트워크가 구성된 사회에서 독립적인 개인주의 자체가 불가능하다 생각해요.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="04">
+        <div class="break-body">
+          <div class="break-eyebrow">PART 2 · 엔진</div>
+          <h2 class="break-hero">이제, <span class="emph">화면 속 세계</span>를 만져볼까요?</h2>
+          <div class="break-sub">Unity의 Particle System으로 입자를 어떻게 처리하는지 보고,<br>Rain Drop과 Fireworks를 확인해봐요.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="plain-white">
+      <div class="slide-shell" style="justify-content:center;align-items:center;padding:40px;">
+        <img src="Midias/letswrapituphere.gif" alt="잠깐 쉬어가요" style="max-width:100%;max-height:100%;object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 ‘옴팡이’ (작가 애소)</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="05">
+        <div class="body-wrap">
+          <h2 class="section-title">특수 효과, <span class="emph">무엇을 가리킬까요?</span></h2>
+          <div class="content">
+            <div class="card-row" style="--cols:2">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="eyebrow" style="font-size: 25px;">특수 효과란?</div>
+                <div class="feature-desc">게임, 영화 등의 미디어에서 사용되는 공감각적 효과예요.<br>보통 현실 세계에서의 경험을 강조하고 부각시키는 용도로 사용해요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="eyebrow" style="font-size: 25px;">게임에서 특수 효과는?</div>
+                <div class="feature-desc">시청각적 품질과 현실감을 제고하여 <b>몰입감</b> 증대 &gt;&gt;&gt; <b>재미</b> 증대로 이어져요.<br>부자연스러운 것을 가리기 위해서도 사용해요.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="06">
+        <div class="body-wrap">
+          <h2 class="section-title">특수 효과의 <span class="emph">네 가지 갈래</span></h2>
+          <div class="content">
+            <div class="card-row" style="--cols:2">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="card-icon">✨</div>
+                <div class="feature-title">파티클 시스템</div>
+                <div class="feature-desc">작은 이미지를 여러 개 뿌려 불 · 연기 · 눈 같은 효과를 만들어요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="card-icon">🔆</div>
+                <div class="feature-title">물리 기반의 렌더링</div>
+                <div class="feature-desc">빛이 실제 재질에 부딪히는 방식을 흉내 내 표면을 사실적으로 보여줘요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--pink-dark);">
+                <div class="card-icon">💡</div>
+                <div class="feature-title">라이팅과 쉐이딩</div>
+                <div class="feature-desc">빛과 그림자로 입체감과 분위기를 만들어요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="card-icon">🎞️</div>
+                <div class="feature-title">포스트 프로세싱</div>
+                <div class="feature-desc">화면이 다 그려진 뒤, 색감 · 흐림 같은 후처리를 더해요.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="07">
+        <div class="body-wrap">
+          <h2 class="section-title"><span class="emph">파티클 시스템</span>이란?</h2>
+          <div class="content">
+            <div class="doc-card">
+              <div class="d-label">파티클 시스템이란?</div>
+              <div class="d-line">이미지나 모델(<b>Particle</b>)을 사용하여 시각적 효과를 생성하는 시스템이에요.<br>불 / 연기 / 물 / 눈 등 다양한 효과 연출이 가능해요.</div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">좋은 파티클 (특수 효과)</div>
+              <div class="d-line" style="font-size:24px;font-weight:800;">화려한 것 ( <span style="color:var(--pink-dark);">X</span> ) → 자연스러운 것 ( <span style="color:var(--grass-dark);">O</span> )</div>
+            </div>
+            <div class="note center">너무 화려하게 꾸미기보다, 그 장면에 <b>자연스럽게 녹아드는지</b>를 먼저 봐요.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="08">
+        <div class="body-wrap">
+          <h2 class="section-title">이렇게 <span class="emph">다양하게</span> 만들 수 있어요</h2>
+          <div class="content">
+            <div class="card-row" style="--cols:4">
+              <div class="visual" style="padding:12px;">
+                <img src="Midias/w11/1.gif" alt="비 내리는 파티클 예시" style="width:100%;border-radius:10px;display:block;">
+                <div class="note center" style="margin-top:8px;font-weight:800;">비</div>
+              </div>
+              <div class="visual" style="padding:12px;">
+                <img src="Midias/w11/2.gif" alt="간이 불꽃 파티클 예시" style="width:100%;border-radius:10px;display:block;">
+                <div class="note center" style="margin-top:8px;font-weight:800;">불꽃</div>
+              </div>
+              <div class="visual" style="padding:12px;">
+                <img src="Midias/w11/3.gif" alt="환형으로 순환하는 파티클 예시" style="width:100%;border-radius:10px;display:block;">
+                <div class="note center" style="margin-top:8px;font-weight:800;">환형 순환</div>
+              </div>
+              <div class="visual" style="padding:12px;">
+                <img src="Midias/w11/4.gif" alt="모닥불 파티클 예시" style="width:100%;border-radius:10px;display:block;">
+                <div class="note center" style="margin-top:8px;font-weight:800;">모닥불</div>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">전부 같은 원리예요</div>
+              <div class="d-line">생김새는 다 달라도, <b>Emission · Shape · Color over Lifetime</b> 같은 같은 모듈 조합으로 만들어요. 오늘은 이 중 Rain Drop과 Fireworks를 직접 만들어봐요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="09">
+        <div class="body-wrap">
+          <h2 class="section-title">Unity엔 <span class="emph">파티클 시스템이 두 개</span> 있어요</h2>
+          <div class="content">
+            <div class="card-row" style="--cols:2">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="eyebrow">오늘 쓸 것</div>
+                <div class="card-icon">✨</div>
+                <div class="feature-title">Shuriken (Particle System)</div>
+                <div class="feature-desc">CPU 기반, 처음부터 내장(Built-in)된 컴포넌트예요. Inspector 체크박스로 모듈을 켜고 끄며 만들어요. 러닝커브가 낮아서, 오늘은 이걸로 실습해요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--pink-dark);">
+                <div class="eyebrow">참고로만 알아둘 것</div>
+                <div class="card-icon">🧩</div>
+                <div class="feature-title">VFX Graph</div>
+                <div class="feature-desc">GPU 기반, 노드를 선으로 연결해서 만들어요. 수십만 개 단위의 입자도 다룰 수 있지만, 별도 패키지 설치가 필요해요.</div>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">오늘은</div>
+              <div class="d-line">기본 내장된 <b>Shuriken</b>으로, 모듈 하나하나가 어떤 역할을 하는지부터 익혀요. VFX Graph는 이 개념 위에서 규모만 키운 버전이라, 오늘 익히는 개념이 그대로 통해요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="10">
+        <div class="body-wrap">
+          <h2 class="section-title">파티클 시스템 <span class="emph">만들기</span></h2>
+          <div class="content">
+            <div class="flow">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="eyebrow">STEP 1</div>
+                <div class="feature-title">에디터 메뉴 / 인스펙터</div>
+                <div class="feature-desc">GameObject → Effects → Particle System으로 추가하고 Inspector를 열어요.</div>
+              </div>
+              <span class="arrow">→</span>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="eyebrow">STEP 2</div>
+                <div class="feature-title">파티클 시스템 모듈 추가</div>
+                <div class="feature-desc">Inspector의 체크박스를 눌러 필요한 모듈(Shape, Color over Lifetime 등)을 켜요.</div>
+              </div>
+              <span class="arrow">→</span>
+              <div class="feature-card" style="--accent:var(--pink-dark);">
+                <div class="eyebrow">STEP 3</div>
+                <div class="feature-title">파티클 설정</div>
+                <div class="feature-desc">켠 모듈 안의 값을 조정하며 원하는 모양과 움직임을 만들어요.</div>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">기억해둘 것</div>
+              <div class="d-line">모듈은 <b>필요한 것만 켜서</b> 써요. 다 켠다고 좋은 효과가 되진 않아요 — 앞서 본 "자연스러움"의 기준을 떠올려요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">기술 참고: <a href="https://docs.unity3d.com/6000.0/Documentation/Manual/PartSysReference.html">Unity 공식 문서 — Particle System</a>.</aside>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="11">
+        <div class="body-wrap">
+          <h2 class="section-title">파티클 시스템, <span class="emph">전체 구조</span>로 보면</h2>
+          <div class="content">
+            <div class="table-grid">
+              <table class="table table-compact">
+                <thead><tr><th>모듈</th><th>역할</th></tr></thead>
+                <tbody>
+                  <tr><td>Main<br>(항상 켜짐)</td><td>Duration · Looping · Start Lifetime/Speed/Size/Color 등, 입자 하나하나의 기본값을 정해요.</td></tr>
+                  <tr><td>Emission</td><td>얼마나 자주, 몇 개씩 태어날지 정해요.</td></tr>
+                  <tr><td>Shape</td><td>어떤 모양의 영역에서 태어날지 정해요.</td></tr>
+                  <tr><td>Velocity over Lifetime</td><td>수명 동안 속도가 어떻게 바뀔지 정해요.</td></tr>
+                  <tr><td>Limit Velocity over Lifetime</td><td>속도의 최대치를 제한해요.</td></tr>
+                  <tr><td>Inherit Velocity</td><td>이미터(부모)의 속도를 입자가 물려받게 해요.</td></tr>
+                  <tr><td>Lifetime by Emitter Speed</td><td>이미터 속도에 따라 입자 수명을 조절해요.</td></tr>
+                  <tr><td>Force over Lifetime</td><td>중력 외에 추가 힘(바람 등)을 줘요.</td></tr>
+                  <tr><td>External Forces</td><td>씬의 Wind Zone 같은 외부 힘을 받게 해요.</td></tr>
+                  <tr><td>Noise</td><td>움직임에 불규칙함을 더해요 — 연기 · 불처럼.</td></tr>
+                  <tr><td>Collision</td><td>바닥 · 벽에 부딪혔을 때 반응을 정해요.</td></tr>
+                  <tr><td>Triggers</td><td>지정 영역 출입을 감지해 콜백을 호출해요.</td></tr>
+                </tbody>
+              </table>
+              <table class="table table-compact">
+                <thead><tr><th>모듈</th><th>역할</th></tr></thead>
+                <tbody>
+                  <tr><td>Color over Lifetime</td><td>수명 동안 색이 어떻게 바뀔지 정해요.</td></tr>
+                  <tr><td>Color by Speed</td><td>속도에 따라 색이 바뀌게 해요.</td></tr>
+                  <tr><td>Size over Lifetime</td><td>수명 동안 크기가 어떻게 바뀔지 정해요.</td></tr>
+                  <tr><td>Size by Speed</td><td>속도에 따라 크기가 바뀌게 해요.</td></tr>
+                  <tr><td>Rotation over Lifetime</td><td>수명 동안 회전하게 해요.</td></tr>
+                  <tr><td>Rotation by Speed</td><td>속도에 따라 회전 속도가 바뀌게 해요.</td></tr>
+                  <tr><td>Sub Emitters</td><td>특정 순간(Birth · Death 등)에 새 파티클을 만들어요.</td></tr>
+                  <tr><td>Texture Sheet Animation</td><td>텍스처 프레임을 순서대로 넘겨 애니메이션처럼 보여요.</td></tr>
+                  <tr><td>Lights</td><td>입자마다 실제 광원을 붙여요.</td></tr>
+                  <tr><td>Trails</td><td>입자가 지나간 자리에 궤적(꼬리)을 남겨요.</td></tr>
+                  <tr><td>Custom Data</td><td>셰이더에 전달할 커스텀 값을 저장해요.</td></tr>
+                  <tr><td>Renderer<br>(항상 켜짐)</td><td>입자를 화면에 어떻게 그릴지 정해요. 끌 수 없어요.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="12">
+        <div class="body-wrap">
+          <h2 class="section-title">Simulation Space, <span class="emph">Local일까 World일까?</span></h2>
+          <div class="content">
+            <div class="card-row" style="--cols:2">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="card-icon">📦</div>
+                <div class="feature-title">Local</div>
+                <div class="feature-desc">파티클이 이미터(부모)를 계속 따라가요. 캐릭터 손에 붙은 마법 이펙트처럼, 발사체와 함께 움직여야 할 때 써요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="card-icon">🌍</div>
+                <div class="feature-title">World</div>
+                <div class="feature-desc">태어난 자리에 그대로 머물러요. 빗방울이나 불꽃놀이처럼, 쏜 사람이 움직여도 입자는 그 자리에 남아야 할 때 써요.</div>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">자주 하는 실수</div>
+              <div class="d-line">Local로 두고 이미터를 움직이면, 이미 태어난 입자까지 같이 끌려와요. 뒤에서 볼 Rain Drop · Fireworks는 둘 다 World를 써요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="13">
+        <div class="body-wrap">
+          <h2 class="section-title">만들어보자 #01 — <span class="emph">Rain Drop</span></h2>
+          <div class="chip-tag" style="align-self:flex-start;margin-top:-8px;">Scene · <b>PlayRainy</b></div>
+          <div class="content">
+            <div class="split">
+              <div class="stack">
+                <div class="inspector">
+                  <h3>Rain</h3>
+                  <div class="setting"><span>Start Speed</span><b>10~15</b></div>
+                  <div class="setting"><span>Start Lifetime</span><b>1~2s</b></div>
+                  <div class="setting"><span>Gravity Modifier</span><b>0.5~1</b></div>
+                  <div class="setting"><span>Shape</span><b>Box (넓고 얇게, 위쪽)</b></div>
+                  <div class="setting"><span>Render Mode</span><b>Stretched Billboard</b></div>
+                  <div class="setting"><span>Length Scale</span><b>2~4</b></div>
+                  <div class="setting"><span>Rate over Time</span><b>50~100</b></div>
+                  <div class="setting"><span>Simulation Space</span><b>World</b></div>
+                </div>
+              </div>
+              <div class="visual">
+                <img src="Midias/w11/1.gif" alt="Rain Drop 파티클 시스템 실행 예시" style="width:100%;border-radius:12px;display:block;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="14">
+        <div class="body-wrap">
+          <h2 class="section-title">Rain Drop, <span class="emph">자연스럽게 다듬기</span></h2>
+          <div class="content">
+            <div class="check-list">
+              <div class="check-item"><b>① 화면을 가득 채우나요?</b>Shape(Box)의 크기를 카메라가 보는 범위에 맞게 넓혀요.</div>
+              <div class="check-item"><b>② 빗줄기가 선처럼 보이나요?</b>Length Scale과 Start Speed를 같이 조정해 길이를 맞춰요.</div>
+              <div class="check-item"><b>③ 바닥에 닿으면 어떻게 되나요?</b>Collision을 켜거나, 바닥용 작은 파티클(물결)을 따로 만들어 겹쳐요.</div>
+              <div class="check-item"><b>④ 너무 쏟아지진 않나요?</b>Rate over Time을 낮춰보고, 화려함보다 자연스러움을 기준으로 비교해요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="15">
+        <div class="body-wrap">
+          <h2 class="section-title">만들어보자 #02 — <span class="emph">Fireworks</span></h2>
+          <div class="chip-tag" style="align-self:flex-start;margin-top:-8px;">Scene · <b>PlayFireworks</b></div>
+          <div class="content">
+            <div class="flow">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="eyebrow">1단계 · 발사</div>
+                <div class="feature-title">Launch 파티클</div>
+                <div class="feature-desc">아래에서 위로 한두 개씩, Gravity로 포물선을 그리며 올라가요.</div>
+              </div>
+              <span class="arrow">→</span>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="eyebrow">2단계 · 폭발</div>
+                <div class="feature-title">Sub Emitter</div>
+                <div class="feature-desc">Launch 파티클이 <b>사라지는 순간(Death)</b>, 그 자리에서 새 파티클을 터뜨려요.</div>
+              </div>
+              <span class="arrow">→</span>
+              <div class="feature-card" style="--accent:var(--pink-dark);">
+                <div class="eyebrow">3단계 · 잔상</div>
+                <div class="feature-title">Color / Trail</div>
+                <div class="feature-desc">Color over Lifetime로 점점 사그라들고, Trail로 궤적을 남겨요.</div>
+              </div>
+            </div>
+            <div class="doc-card">
+              <div class="d-label">참고</div>
+              <div class="d-line">실제 불꽃놀이 영상을 잠깐 보고, <b>발사 → 정점 → 폭발 → 사그라듦</b>의 타이밍을 눈으로 익혀봐요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="16">
+        <div class="body-wrap">
+          <h2 class="section-title">Fireworks <span class="emph">설정 디테일</span></h2>
+          <div class="content">
+            <div class="split">
+              <div class="stack">
+                <div class="inspector">
+                  <h3>Fireworks</h3>
+                  <div class="setting"><span>Start Speed (Launch)</span><b>8~12</b></div>
+                  <div class="setting"><span>Start Lifetime (Launch)</span><b>1~1.5s</b></div>
+                  <div class="setting"><span>Gravity Modifier</span><b>1</b></div>
+                  <div class="setting"><span>Emission</span><b>Burst 1~2개</b></div>
+                  <div class="setting"><span>Sub Emitters</span><b>Birth = Death</b></div>
+                  <div class="setting"><span>Shape (Explosion)</span><b>Sphere</b></div>
+                  <div class="setting"><span>Start Speed (Explosion)</span><b>3~6 (방사형)</b></div>
+                  <div class="setting"><span>Color over Lifetime</span><b>밝게 → 투명하게</b></div>
+                </div>
+              </div>
+              <div class="visual">
+                <img src="Midias\w11\2.gif" alt="간이 Fireworks 파티클 시스템 실행 예시" style="width:100%;border-radius:12px;display:block;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="17">
+        <div class="body-wrap">
+          <h2 class="section-title">Sub Emitters, <span class="emph">네 가지 트리거</span></h2>
+          <div class="content">
+            <table class="table">
+              <thead><tr><th>트리거</th><th>언제 새 파티클이 태어날까요</th></tr></thead>
+              <tbody>
+                <tr><td>Birth</td><td>부모 입자가 태어나는 순간 — 발사 직후 연기 꼬리처럼</td></tr>
+                <tr><td>Collision</td><td>부모 입자가 뭔가에 부딪히는 순간 — 빗방울이 바닥에 튀는 효과처럼</td></tr>
+                <tr><td>Death</td><td>부모 입자가 수명을 다하는 순간 — Fireworks의 폭발처럼</td></tr>
+                <tr><td>Trigger</td><td>지정한 영역에 들어오거나 나갈 때 — 특정 구역 통과를 감지할 때</td></tr>
+              </tbody>
+            </table>
+            <div class="doc-card">
+              <div class="d-label">더 만들어보고 싶다면</div>
+              <div class="d-line">Death에 Birth를 하나 더 얹으면, 폭발하면서 동시에 반짝이는 잔불까지 — 레이어를 겹쳐볼 수 있어요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="18">
+        <div class="body-wrap">
+          <h2 class="section-title">파티클이 <span class="emph">안 보일 때</span></h2>
+          <div class="content">
+            <div class="check-list">
+              <div class="check-item"><b>① Play On Awake가 꺼져있나요?</b>껐다면 코드로 직접 Play()를 호출해야 해요.</div>
+              <div class="check-item"><b>② Start Lifetime이 0은 아닌가요?</b>태어나자마자 바로 사라지고 있을 수 있어요.</div>
+              <div class="check-item"><b>③ Max Particles가 너무 작진 않나요?</b>Emission보다 작으면 입자가 더 못 태어나요.</div>
+              <div class="check-item"><b>④ Renderer의 Material이 비어있진 않나요?</b>모양은 있는데 눈엔 안 보이는 가장 흔한 원인이에요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="19">
+        <div class="body-wrap">
+          <h2 class="section-title">과제 — <span class="emph">나만의 불꽃놀이 만들기</span></h2>
+          <div class="content">
+            <div class="card-row" style="--cols:2">
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="card-icon">✨</div>
+                <div class="feature-title">파티클 시스템 사용</div>
+                <div class="feature-desc">오늘 배운 모듈로 직접 설계한 불꽃놀이를 만들어요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--grass-dark);">
+                <div class="card-icon">🎵</div>
+                <div class="feature-title">노래 한 곡 시간 (자유곡)</div>
+                <div class="feature-desc">원하는 곡을 골라, 그 곡 길이에 맞춰 연출해요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--pink-dark);">
+                <div class="card-icon">🧩</div>
+                <div class="feature-title">지금까지 수업에 나왔던 것들</div>
+                <div class="feature-desc">FSM · 오디오 · 피드백 설계 등 배운 요소를 자유롭게 섞어도 좋아요.</div>
+              </div>
+              <div class="feature-card" style="--accent:var(--blue);">
+                <div class="card-icon">🔗</div>
+                <div class="feature-title">git 개인 repository에 공유</div>
+                <div class="feature-desc">개인 repository에 프로젝트를 생성한 뒤 공유해요.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell" data-page="20">
+        <div class="body-wrap">
+          <h2 class="section-title">오늘, <span class="emph">기억할 것들</span></h2>
+          <div class="content">
+            <div class="why-list">
+              <div class="why-item"><span class="check">✓</span>Shuriken은 CPU 기반 내장 시스템, VFX Graph는 GPU 기반 노드 시스템 — 오늘은 Shuriken으로 개념을 익혔어요.</div>
+              <div class="why-item"><span class="check">✓</span>좋은 파티클은 화려함보다 <b>자연스러움</b>이 먼저예요.</div>
+              <div class="why-item"><span class="check">✓</span>Emission(얼마나) · Shape(어디서) · Renderer(어떻게)가 Particle System의 기본 뼈대예요.</div>
+              <div class="why-item"><span class="check">✓</span>Simulation Space는 World/Local — 이펙트가 발사체를 따라가야 하는지부터 정해요.</div>
+              <div class="why-item"><span class="check">✓</span>Sub Emitters로 파티클이 사라지는 자리에서 새 파티클을 또 터뜨릴 수 있어요 — Fireworks의 핵심이에요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="plain-white">
+      <div class="slide-shell" style="justify-content:center;align-items:center;padding:40px;">
+        <img src="Midias/letscallitaday.gif" alt="오늘은 여기까지" style="max-width:100%;max-height:100%;object-fit:contain;">
+        <div class="img-credit">출처: 카카오톡 이모티콘 ‘옴팡이’ (작가 애소)</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slide-shell">
+        <div class="body-wrap">
+          <h2 class="section-title">다음 주는, 이 <span class="emph">질문</span>으로 시작합니다.</h2>
+          <div class="teaser-wrap" style="gap:24px;">
+            <div class="teaser-icon" style="width:auto;height:auto;">
+              <span class="power-emoji" style="font-size:130px;">📉</span>
+            </div>
+            <div class="teaser-question small"><span class="emph">어느 쪽</span>이 더 치명적이었을까요?</div>
+            <div class="teaser-caption mono"><b>IMF · 닷컴버블 · 카드대란 · 금융위기</b> vs. <b>코로나19 · AI</b></div>
+            <div class="teaser-caption mono">NEXT WEEK · ICE BREAKING</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script>
+  const TOTAL_PAGES = 20;
+  const FOOTER_TAG = 'WEEK 11';
+
+  document.querySelectorAll('.slide-shell[data-page]').forEach(el => {
+    const header = document.createElement('div');
+    header.className = 'cs-header';
+    header.innerHTML = '<div class="brand"><div class="brand-badge">G</div><span>Capstone Game Engine</span></div>';
+    const footer = document.createElement('div');
+    footer.className = 'cs-footer';
+    footer.innerHTML = '<div class="chip-tag">' + FOOTER_TAG + '</div><div class="chip-tag">' + el.dataset.page + ' / ' + TOTAL_PAGES + '</div>';
+    el.prepend(header);
+    el.append(footer);
+  });
+
+  Reveal.initialize({
+    hash: true, controls: true, progress: true, center: false,
+    transition: 'fade', width: 1280, height: 720, margin: 0,
+  });
+
+  let wheelLocked = false;
+  document.addEventListener('wheel', (e) => {
+    if (wheelLocked || Math.abs(e.deltaY) < 1 || e.target.closest('pre')) return;
+    wheelLocked = true;
+    if (e.deltaY > 0) Reveal.next(); else Reveal.prev();
+    setTimeout(() => { wheelLocked = false; }, 600);
+  }, { passive: true });
+
+  // ---------- Cursor trail ----------
+  (() => {
+    const canvas = document.getElementById('cursorTrail');
+    const ctx = canvas.getContext('2d');
+    const rootStyle = getComputedStyle(document.documentElement);
+    const palette = ['--blue', '--green', '--pink', '--yellow-dark'].map(
+      v => rootStyle.getPropertyValue(v).trim()
+    );
+    let colorIndex = 0;
+    let particles = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    document.addEventListener('mousemove', (e) => {
+      particles.push({
+        x: e.clientX, y: e.clientY,
+        r: 9, alpha: 1,
+        color: palette[colorIndex++ % palette.length],
+      });
+      if (particles.length > 40) particles.shift();
+    });
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.r *= 0.92;
+        p.alpha *= 0.9;
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      particles = particles.filter(p => p.alpha > 0.03 && p.r > 0.5);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
+</script>
+</body>
+</html>
