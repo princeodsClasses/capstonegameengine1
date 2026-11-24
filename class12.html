@@ -302,6 +302,45 @@
   html.print-pdf .draw-path{ animation:none !important; stroke-dashoffset:0 !important; }
   html.print-pdf .svg-pop{ animation:none !important; opacity:1 !important; transform:none !important; }
 
+  section.present .card-row > *{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .card-row > *:nth-child(1){ animation-delay:.05s; }
+  section.present .card-row > *:nth-child(2){ animation-delay:.16s; }
+  section.present .card-row > *:nth-child(3){ animation-delay:.27s; }
+  section.present .card-row > *:nth-child(4){ animation-delay:.38s; }
+
+  section.present .check-list .check-item{ animation:fadeUp .45s ease-out both; }
+  section.present .check-list .check-item:nth-child(1){ animation-delay:.03s; }
+  section.present .check-list .check-item:nth-child(2){ animation-delay:.08s; }
+  section.present .check-list .check-item:nth-child(3){ animation-delay:.13s; }
+  section.present .check-list .check-item:nth-child(4){ animation-delay:.18s; }
+  section.present .check-list .check-item:nth-child(5){ animation-delay:.23s; }
+  section.present .check-list .check-item:nth-child(6){ animation-delay:.28s; }
+  section.present .check-list .check-item:nth-child(7){ animation-delay:.33s; }
+  section.present .check-list .check-item:nth-child(8){ animation-delay:.38s; }
+
+  section.present .tip-grid .tip-card{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .tip-grid .tip-card:nth-child(1){ animation-delay:.02s; }
+  section.present .tip-grid .tip-card:nth-child(2){ animation-delay:.06s; }
+  section.present .tip-grid .tip-card:nth-child(3){ animation-delay:.1s; }
+  section.present .tip-grid .tip-card:nth-child(4){ animation-delay:.14s; }
+  section.present .tip-grid .tip-card:nth-child(5){ animation-delay:.18s; }
+  section.present .tip-grid .tip-card:nth-child(6){ animation-delay:.22s; }
+  section.present .tip-grid .tip-card:nth-child(7){ animation-delay:.26s; }
+  section.present .tip-grid .tip-card:nth-child(8){ animation-delay:.3s; }
+  section.present .tip-grid .tip-card:nth-child(9){ animation-delay:.34s; }
+  section.present .tip-grid .tip-card:nth-child(10){ animation-delay:.38s; }
+
+  section.present .flow > .feature-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .flow > .feature-card:nth-child(1){ animation-delay:.05s; }
+  section.present .flow > .feature-card:nth-child(3){ animation-delay:.2s; }
+  section.present .flow > .feature-card:nth-child(5){ animation-delay:.35s; }
+  section.present .flow > .feature-card:nth-child(7){ animation-delay:.5s; }
+
+  section.present .doc-card{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  section.present .content > .doc-card:nth-child(1){ animation-delay:.05s; }
+  section.present .content > .doc-card:nth-child(2){ animation-delay:.18s; }
+  section.present .content > .doc-card:nth-child(3){ animation-delay:.31s; }
+
   section.present .title-stage .pill-tag{ animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
   section.present .title-stage .headline-hero{ animation:fadeUp .6s ease-out .15s both; }
   section.present .title-stage .subline{ animation:fadeUp .6s ease-out .3s both; }
@@ -608,6 +647,53 @@
   html.print-pdf .fragment {
     opacity: 1 !important;
     visibility: visible !important;
+    transform: none !important;
+  }
+
+  .reveal .fragment {
+    animation: none !important;
+    transform: scale(.88) translateY(14px);
+    transition: opacity .5s cubic-bezier(.34,1.56,.64,1), transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .reveal .fragment.visible {
+    transform: scale(1) translateY(0);
+  }
+
+  .content > .fragment:nth-child(1) { transition-delay: 0s; }
+  .content > .fragment:nth-child(2) { transition-delay: .08s; }
+  .content > .fragment:nth-child(3) { transition-delay: .16s; }
+  .content > .fragment:nth-child(4) { transition-delay: .24s; }
+
+  .card-row > .fragment:nth-child(1) { transition-delay: 0s; }
+  .card-row > .fragment:nth-child(2) { transition-delay: .08s; }
+  .card-row > .fragment:nth-child(3) { transition-delay: .16s; }
+  .card-row > .fragment:nth-child(4) { transition-delay: .24s; }
+
+  .check-list > .fragment:nth-child(1) { transition-delay: 0s; }
+  .check-list > .fragment:nth-child(2) { transition-delay: .05s; }
+  .check-list > .fragment:nth-child(3) { transition-delay: .1s; }
+  .check-list > .fragment:nth-child(4) { transition-delay: .15s; }
+  .check-list > .fragment:nth-child(5) { transition-delay: .2s; }
+  .check-list > .fragment:nth-child(6) { transition-delay: .25s; }
+  .check-list > .fragment:nth-child(7) { transition-delay: .3s; }
+  .check-list > .fragment:nth-child(8) { transition-delay: .35s; }
+
+  .tip-grid > .fragment:nth-child(1) { transition-delay: 0s; }
+  .tip-grid > .fragment:nth-child(2) { transition-delay: .04s; }
+  .tip-grid > .fragment:nth-child(3) { transition-delay: .08s; }
+  .tip-grid > .fragment:nth-child(4) { transition-delay: .12s; }
+  .tip-grid > .fragment:nth-child(5) { transition-delay: .16s; }
+  .tip-grid > .fragment:nth-child(6) { transition-delay: .2s; }
+  .tip-grid > .fragment:nth-child(7) { transition-delay: .24s; }
+  .tip-grid > .fragment:nth-child(8) { transition-delay: .28s; }
+  .tip-grid > .fragment:nth-child(9) { transition-delay: .32s; }
+  .tip-grid > .fragment:nth-child(10) { transition-delay: .36s; }
+
+  .note.fragment { transition-delay: .4s; }
+
+  .slide-shell[data-page="24"] .content,
+  .slide-shell[data-page="25"] .content {
+    justify-content: flex-start;
   }
 
   .q-reveal-shell .section-title.q-rise {
@@ -1172,64 +1258,64 @@
     <section>
       <div class="slide-shell q-reveal-shell" data-page="23">
         <div class="body-wrap">
-          <h2 class="section-title q-rise">에디터 꿀팁 — <span class="emph">알아두면 편한 것들</span></h2>
+          <h2 class="section-title q-rise">에디터의 이런 <span class="emph">기능</span> 알고 있어요?</h2>
           <div class="content">
-            <div class="tip-grid fragment" data-fragment-index="0">
-              <div class="tip-card" style="--accent:var(--blue-dark);">
+            <div class="tip-grid">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--blue-dark);">
                 <div class="tip-icon">🖥️</div>
                 <div class="tip-key">Shift + Space</div>
                 <div class="tip-title">뷰 최대화</div>
                 <div class="tip-desc">마우스 올린 뷰를 전체 화면으로</div>
               </div>
-              <div class="tip-card" style="--accent:var(--grass-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--grass-dark);">
                 <div class="tip-icon">🎯</div>
                 <div class="tip-key">F</div>
                 <div class="tip-title">오브젝트 포커스</div>
                 <div class="tip-desc">Scene 뷰가 선택 오브젝트로 모여요</div>
               </div>
-              <div class="tip-card" style="--accent:var(--pink-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--pink-dark);">
                 <div class="tip-icon">🔒</div>
                 <div class="tip-key">손가락 아이콘</div>
                 <div class="tip-title">선택 불가 처리</div>
                 <div class="tip-desc">고정 배경 오브젝트에 사용</div>
               </div>
-              <div class="tip-card" style="--accent:var(--blue);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--blue);">
                 <div class="tip-icon">📍</div>
                 <div class="tip-key">Ctrl + Shift + F</div>
                 <div class="tip-title">오브젝트 이동</div>
                 <div class="tip-desc">카메라·Light를 현재 뷰 위치로</div>
               </div>
-              <div class="tip-card" style="--accent:var(--yellow-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--yellow-dark);">
                 <div class="tip-icon">👀</div>
                 <div class="tip-key">Shift + F</div>
                 <div class="tip-title">오브젝트 추적</div>
                 <div class="tip-desc">Scene 뷰가 오브젝트를 계속 따라가요</div>
               </div>
-              <div class="tip-card" style="--accent:var(--blue-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--blue-dark);">
                 <div class="tip-icon">🧲</div>
                 <div class="tip-key">V / Ctrl</div>
                 <div class="tip-title">붙이기 · 이동</div>
                 <div class="tip-desc">꼭짓점 스냅 / 그리드 단위 이동</div>
               </div>
-              <div class="tip-card" style="--accent:var(--grass-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--grass-dark);">
                 <div class="tip-icon">🏷️</div>
                 <div class="tip-key">Select Icon</div>
                 <div class="tip-title">오브젝트 표기</div>
                 <div class="tip-desc">빈 오브젝트도 Scene 뷰에서 바로 찾기</div>
               </div>
-              <div class="tip-card" style="--accent:var(--pink-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--pink-dark);">
                 <div class="tip-icon">🧮</div>
                 <div class="tip-key">Inspector</div>
                 <div class="tip-title">수식 입력</div>
                 <div class="tip-desc">숫자 칸에 식을 써도 계산돼요</div>
               </div>
-              <div class="tip-card" style="--accent:var(--blue);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--blue);">
                 <div class="tip-icon">📌</div>
                 <div class="tip-key">Lock</div>
                 <div class="tip-title">뷰 락 & 멀티 뷰</div>
                 <div class="tip-desc">여러 오브젝트를 동시에 보기</div>
               </div>
-              <div class="tip-card" style="--accent:var(--yellow-dark);">
+              <div class="tip-card fragment" data-fragment-index="0" style="--accent:var(--yellow-dark);">
                 <div class="tip-icon">🎨</div>
                 <div class="tip-key">Playmode Tint</div>
                 <div class="tip-title">모드 표기</div>
@@ -1244,70 +1330,14 @@
     <section>
       <div class="slide-shell" data-page="24">
         <div class="body-wrap">
-          <h2 class="section-title">엔진 TIP — <span class="emph">갱신 주기에 따라 Canvas 분리</span></h2>
-          <div class="content">
-            <div class="card-row">
-              <div class="feature-card" style="--accent:var(--blue-dark);">
-                <div class="eyebrow">갱신이 드문 UI</div>
-                <div class="feature-title">배경 · 테두리 · 고정 아이콘</div>
-                <div class="feature-desc">같은 HUD에서 화면 틀을 이루는 요소를 한 Canvas에 둬요.</div>
-              </div>
-              <div class="feature-card" style="--accent:var(--grass-dark);">
-                <div class="eyebrow">갱신이 잦은 UI</div>
-                <div class="feature-title">타이머 · 애니메이션 게이지</div>
-                <div class="feature-desc">자주 바뀌는 요소를 자식 Canvas에 두면, 타이머가 바뀔 때 다시 배치를 계산하는 범위를 줄일 수 있어요.</div>
-              </div>
-            </div>
-            <div class="note center">Unity uGUI에서 Canvas를 나누는 기준은 UI 요소의 변경 빈도예요. 화면에 그려지는 것과 UI 배치를 다시 계산하는 것은 별개예요.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="slide-shell" data-page="25">
-        <div class="body-wrap">
-          <h2 class="section-title">엔진 TIP — <span class="emph">Canvas 분리 전후 비교</span></h2>
-          <div class="content">
-            <div class="doc-card">
-              <div class="d-label">같은 HUD로 비교</div>
-              <div class="d-line">Canvas 하나에 전부 둔 경우와 타이머·게이지만 자식 Canvas에 옮긴 경우를 비교해요. 같은 씬에서 타이머와 게이지를 같은 방식으로 갱신해요.</div>
-            </div>
-            <div class="doc-card">
-              <div class="d-label">Profiler에서 볼 것</div>
-              <div class="d-line">CPU에서 Canvas 배치 계산에 걸린 시간과 UI 배치 수를 함께 봐요. Canvas 간에는 배치가 합쳐지지 않아 분리 후 배치 수가 늘 수 있어요.</div>
-            </div>
-            <div class="note center">참고 · <a href="https://unity.com/how-to/unity-ui-optimization-tips">Unity 공식 UI 최적화 가이드</a></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="slide-shell" data-page="26">
-        <div class="body-wrap">
-          <h2 class="section-title">결국, <span class="emph">공통된 처방</span>이에요</h2>
-          <div class="content">
-            <div class="why-list">
-              <div class="why-item"><span class="check">✓</span>기획에서 안 풀리는 것도, 엔진에서 안 풀리는 것도 — 결국 "내 눈"이 아니라 "상대의 눈"(플레이어, 또는 이 코드를 나중에 볼 사람)으로 다시 보는 데서 풀려요.</div>
-              <div class="why-item"><span class="check">✓</span>"재밌다"를 확인하려면 다른 사람에게 보여줘야 하고, "고쳐졌다"를 설명하려면 나부터 이해해야 해요 — 둘 다 내가 직접 거쳐야 하는 과정이에요.</div>
-              <div class="why-item"><span class="check">✓</span>AI가 빨라진 건 "타이핑"이에요 — "핵심이 뭔지 판단하는 것"은 그대로 우리 역할이에요.</div>
-              <div class="why-item"><span class="check">✓</span>혼자 짊어지지 말고, 지금 걸린 문제를 조원에게 소리 내어 설명해보는 것부터 시작해요.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="slide-shell" data-page="27">
-        <div class="body-wrap">
           <h2 class="section-title">오늘, <span class="emph">기억할 것들</span></h2>
           <div class="content">
             <div class="why-list">
               <div class="why-item"><span class="check">✓</span>"재밌다"는 내 느낌이 아니라, 결국 플레이어 눈으로 확인해야 하는 사람의 판단 영역이에요.</div>
+              <div class="why-item"><span class="check">✓</span>"재밌다"를 확인하려면 다른 사람에게 보여줘야 하고, "고쳐졌다"를 설명하려면 나부터 이해해야 해요 — 둘 다 내가 직접 거쳐야 하는 과정이에요.</div>
               <div class="why-item"><span class="check">✓</span>에이전트 시대에도 "진단력"과 "이해하고 쓰는 습관"은 그대로 실력이에요.</div>
-              <div class="why-item"><span class="check">✓</span>예시 · 다음 수업까지 민지가 처음 보는 두 명에게 첫 판을 맡기고, 둘 다 멈춘 구간을 기록해요.</div>
+              <div class="why-item"><span class="check">✓</span>AI가 빨라진 건 "타이핑"이에요 — "핵심이 뭔지 판단하는 것"은 그대로 우리 역할이에요.</div>
+              <div class="why-item"><span class="check">✓</span>혼자 짊어지지 말고, 지금 걸린 문제를 조원에게 소리 내어 설명해보는 것부터 시작해요.</div>
             </div>
           </div>
         </div>
